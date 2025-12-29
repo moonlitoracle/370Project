@@ -45,3 +45,4 @@ if ($method === 'GET') {
 
 sendResponse('error', 'Invalid request');
 ?>
+
