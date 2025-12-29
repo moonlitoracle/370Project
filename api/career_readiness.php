@@ -32,7 +32,21 @@ if ($method === 'GET' && $action === 'evaluate') {
     $stmt = $conn->prepare("
         SELECT s.name,
                cs.level AS required_level,
-               IFNULL(us.level, 0) AS user_level
+               IFNULL(us.proficiency, 'None') AS user_level,
+               CASE cs.level
+                   WHEN 'Beginner' THEN 1
+                   WHEN 'Intermediate' THEN 2
+                   WHEN 'Advanced' THEN 3
+                   WHEN 'Expert' THEN 4
+                   ELSE 0
+               END AS req_val,
+               CASE IFNULL(us.proficiency, 'None')
+                   WHEN 'Beginner' THEN 1
+                   WHEN 'Intermediate' THEN 2
+                   WHEN 'Advanced' THEN 3
+                   WHEN 'Expert' THEN 4
+                   ELSE 0
+               END AS user_val
         FROM career_skills cs
         JOIN skills s ON cs.skill_id = s.skill_id
         LEFT JOIN user_skills us
@@ -47,9 +61,12 @@ if ($method === 'GET' && $action === 'evaluate') {
     $gaps = [];
 
     foreach ($skills as $s) {
-        if ($s['user_level'] >= $s['required_level']) {
+        if ($s['user_val'] >= $s['req_val']) {
             $matched++;
         } else {
+            // Remove internal validation values before sending to frontend
+            unset($s['req_val']);
+            unset($s['user_val']);
             $gaps[] = $s;
         }
     }

@@ -161,6 +161,53 @@ const Milestones = {
     }
 };
 
+// ========== Learning Resources API ========== //
+const Resources = {
+    // Get resources for a specific skill
+    getBySkill: async (skillId) => {
+        return await apiCall(`/learning_resources.php?action=by_skill&skill_id=${skillId}`, {
+            method: 'GET'
+        });
+    },
+
+    // Get all resources
+    list: async () => {
+        return await apiCall('/learning_resources.php?action=list', {
+            method: 'GET'
+        });
+    }
+};
+
+// ========== Career Readiness API ========== //
+const CareerReadiness = {
+    // Evaluate user's readiness for a specific career
+    evaluate: async (careerId) => {
+        return await apiCall(`/career_readiness.php?action=evaluate&career_id=${careerId}`, {
+            method: 'GET'
+        });
+    }
+};
+
+// ========== Insights API ========== //
+const Insights = {
+    // Get user progress insights
+    get: async () => {
+        return await apiCall('/insights.php', {
+            method: 'GET'
+        });
+    }
+};
+
+// ========== Progress API ========== //
+const Progress = {
+    // Get user's overall progress
+    get: async () => {
+        return await apiCall('/users.php', {
+            method: 'GET'
+        });
+    }
+};
+
 // ========== UI Helper Functions ========== //
 const UI = {
     // Show message to user
@@ -194,5 +241,5 @@ const UI = {
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { Auth, User, Career, Goals, Milestones, UI };
+    module.exports = { Auth, User, Career, Goals, Milestones, Resources, CareerReadiness, Insights, Progress, UI };
 }

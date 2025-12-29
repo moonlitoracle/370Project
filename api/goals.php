@@ -110,7 +110,7 @@ if ($method === 'DELETE' && $action === 'delete') {
 }
 
 // ---------- Milestones ---------- //
-// Add a milestones to a goal
+// Add a milestone to a goal
 if ($method === 'POST' && $action === 'add_milestone') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
@@ -128,37 +128,37 @@ if ($method === 'POST' && $action === 'add_milestone') {
         $mid = $conn->lastInsertId();
         sendResponse('success', 'Milestone added', ['milestone_id' => $mid]);
     } catch (PDOException $e) {
-        sendResponse('error', 'Failed to add milestones');
+        sendResponse('error', 'Failed to add milestone');
     }
 }
 
-// Update a milestones
+// Update a milestone
 if (($method === 'PUT' || $method === 'POST') && $action === 'update_milestone') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
-    $milestonesId = $input['milestone_id'] ?? null;
-    if (!$milestonesId) { sendResponse('error', 'milestone_id required'); }
+    $milestoneId = $input['milestone_id'] ?? null;
+    if (!$milestoneId) { sendResponse('error', 'milestone_id required'); }
     $fields = [];
     $params = [];
     if (isset($input['title'])) { $fields[] = 'title = ?'; $params[] = $input['title']; }
     if (isset($input['status'])) { $fields[] = 'status = ?'; $params[] = $input['status']; }
     if (empty($fields)) { sendResponse('error', 'No fields to update'); }
-    // Ensure milestones belongs to user's goal
+    // Ensure milestone belongs to user's goal
     $stmt = $conn->prepare("SELECT m.milestone_id FROM milestones m JOIN goals g ON m.goal_id = g.goal_id WHERE m.milestone_id = ? AND g.user_id = ?");
-    $stmt->execute([$milestonesId, $_SESSION['user_id']]);
+    $stmt->execute([$milestoneId, $_SESSION['user_id']]);
     if (!$stmt->fetch()) { sendResponse('error', 'Milestone not found or unauthorized'); }
-    $params[] = $milestonesId;
+    $params[] = $milestoneId;
     $sql = "UPDATE milestones SET " . implode(', ', $fields) . " WHERE milestone_id = ?";
     $stmt = $conn->prepare($sql);
     try {
         $stmt->execute($params);
         sendResponse('success', 'Milestone updated');
     } catch (PDOException $e) {
-        sendResponse('error', 'Failed to update milestones');
+        sendResponse('error', 'Failed to update milestone');
     }
 }
 
-// Delete a milestones
+// Delete a milestone
 if ($method === 'DELETE' && $action === 'delete_milestone') {
     requireAuth();
     $mid = $_GET['id'] ?? null;
