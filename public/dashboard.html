@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Career Roadmap</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">CareerRoadmap</div>
+            <ul>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="careers.html">Careers</a></li>
+                <li><a href="goals.html">Goals</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="dashboard-container">
+        <h1>Welcome, <span id="userName">User</span>!</h1>
+
+        <section class="dashboard-section">
+            <h2>Your Profile</h2>
+            <div id="profileInfo">
+                <p><strong>Email:</strong> <span id="userEmail"></span></p>
+                <p><strong>Level:</strong> <span id="userLevel"></span></p>
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>Quick Actions</h2>
+            <div class="action-buttons">
+                <a href="careers.html" class="btn">Explore Careers</a>
+                <a href="goals.html" class="btn">Manage Goals</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Check authentication
+        async function checkAuth() {
+            const result = await Auth.checkSession();
+            if (result.status !== 'success') {
+                UI.redirect('login.html');
+                return false;
+            }
+            return true;
+        }
+
+        // Load user profile
+        async function loadProfile() {
+            const result = await User.getProfile();
+            if (result.status === 'success') {
+                const user = result.data;
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('userLevel').textContent = user.level;
+                UI.setCurrentUser(user);
+            }
+        }
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const result = await Auth.logout();
+            if (result.status === 'success') {
+                UI.clearCurrentUser();
+                UI.redirect('index.html');
+            }
+        });
+
+        // Initialize
+        (async () => {
+            if (await checkAuth()) {
+                await loadProfile();
+            }
+        })();
+    </script>
+</body>
+
+</html>

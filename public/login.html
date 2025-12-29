@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Career Roadmap</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Login</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+                <p class="auth-link">Don't have an account? <a href="register.html">Register</a></p>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const result = await Auth.login(email, password);
+
+            if (result.status === 'success') {
+                UI.setCurrentUser(result.data);
+                UI.showMessage('Login successful!', 'success');
+                UI.redirect('dashboard.html');
+            } else {
+                UI.showMessage(result.message, 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>

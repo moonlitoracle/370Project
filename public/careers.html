@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers - Career Roadmap</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">CareerRoadmap</div>
+            <ul>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="careers.html">Careers</a></li>
+                <li><a href="goals.html">Goals</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="careers-container">
+        <h1>Explore Careers</h1>
+
+        <section class="careers-list">
+            <h2>Available Careers</h2>
+            <div id="careersList"></div>
+        </section>
+
+        <section class="career-details" id="careerDetails" style="display: none;">
+            <h2 id="careerName"></h2>
+            <p id="careerOverview"></p>
+            <h3>Required Skills</h3>
+            <div id="requiredSkills"></div>
+            <button id="selectCareerBtn" class="btn">Select This Career</button>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        let selectedCareerId = null;
+
+        // Check authentication
+        async function checkAuth() {
+            const result = await Auth.checkSession();
+            if (result.status !== 'success') {
+                UI.redirect('login.html');
+                return false;
+            }
+            return true;
+        }
+
+        // Load careers list
+        async function loadCareers() {
+            const result = await Career.list();
+            if (result.status === 'success') {
+                const careersList = document.getElementById('careersList');
+                careersList.innerHTML = '';
+
+                result.data.forEach(career => {
+                    const careerCard = document.createElement('div');
+                    careerCard.className = 'career-card';
+                    careerCard.innerHTML = `
+                        <h3>${career.name}</h3>
+                        <p>${career.overview || 'No description available'}</p>
+                        <button onclick="viewCareerDetails(${career.career_id})">View Details</button>
+                    `;
+                    careersList.appendChild(careerCard);
+                });
+            }
+        }
+
+        // View career details
+        window.viewCareerDetails = async (careerId) => {
+            const result = await Career.getDetails(careerId);
+            if (result.status === 'success') {
+                selectedCareerId = careerId;
+                const career = result.data;
+
+                document.getElementById('careerName').textContent = career.name;
+                document.getElementById('careerOverview').textContent = career.overview || 'No description available';
+
+                const skillsList = document.getElementById('requiredSkills');
+                skillsList.innerHTML = '';
+
+                if (career.required_skills && career.required_skills.length > 0) {
+                    career.required_skills.forEach(skill => {
+                        const skillItem = document.createElement('div');
+                        skillItem.className = 'skill-item';
+                        skillItem.innerHTML = `
+                            <strong>${skill.name}</strong> - Required Level: ${skill.level}
+                            <p>${skill.description || ''}</p>
+                        `;
+                        skillsList.appendChild(skillItem);
+                    });
+                } else {
+                    skillsList.innerHTML = '<p>No specific skills required</p>';
+                }
+
+                document.getElementById('careerDetails').style.display = 'block';
+            }
+        };
+
+        // Select career
+        document.getElementById('selectCareerBtn').addEventListener('click', async () => {
+            if (!selectedCareerId) return;
+
+            const result = await Career.select(selectedCareerId);
+            if (result.status === 'success') {
+                UI.showMessage('Career selected successfully!', 'success');
+            } else {
+                UI.showMessage(result.message, 'error');
+            }
+        });
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const result = await Auth.logout();
+            if (result.status === 'success') {
+                UI.clearCurrentUser();
+                UI.redirect('index.html');
+            }
+        });
+
+        // Initialize
+        (async () => {
+            if (await checkAuth()) {
+                await loadCareers();
+            }
+        })();
+    </script>
+</body>
+
+</html>

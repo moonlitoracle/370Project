@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goals - Career Roadmap</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">CareerRoadmap</div>
+            <ul>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="careers.html">Careers</a></li>
+                <li><a href="goals.html">Goals</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="goals-container">
+        <h1>Goal Management</h1>
+
+        <section class="create-goal">
+            <h2>Create New Goal</h2>
+            <form id="createGoalForm">
+                <div class="form-group">
+                    <label for="goalTitle">Goal Title</label>
+                    <input type="text" id="goalTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="goalDeadline">Deadline</label>
+                    <input type="date" id="goalDeadline" required>
+                </div>
+                <div class="form-group">
+                    <label for="goalStatus">Status</label>
+                    <select id="goalStatus">
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Create Goal</button>
+            </form>
+        </section>
+
+        <section class="goals-list">
+            <h2>Your Goals</h2>
+            <div id="goalsList"></div>
+        </section>
+
+        <section class="goal-details" id="goalDetails" style="display: none;">
+            <h2 id="goalDetailsTitle"></h2>
+            <p><strong>Deadline:</strong> <span id="goalDetailsDeadline"></span></p>
+            <p><strong>Status:</strong> <span id="goalDetailsStatus"></span></p>
+
+            <h3>Milestones</h3>
+            <div id="milestonesList"></div>
+
+            <h3>Add Milestone</h3>
+            <form id="addMilestoneForm">
+                <div class="form-group">
+                    <input type="text" id="milestoneTitle" placeholder="Milestone title" required>
+                </div>
+                <button type="submit" class="btn">Add Milestone</button>
+            </form>
+
+            <button id="deleteGoalBtn" class="btn btn-danger">Delete Goal</button>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        let currentGoalId = null;
+
+        // Check authentication
+        async function checkAuth() {
+            const result = await Auth.checkSession();
+            if (result.status !== 'success') {
+                UI.redirect('login.html');
+                return false;
+            }
+            return true;
+        }
+
+        // Load goals list
+        async function loadGoals() {
+            const result = await Goals.list();
+            if (result.status === 'success') {
+                const goalsList = document.getElementById('goalsList');
+                goalsList.innerHTML = '';
+
+                if (result.data.length === 0) {
+                    goalsList.innerHTML = '<p>No goals yet. Create your first goal!</p>';
+                    return;
+                }
+
+                result.data.forEach(goal => {
+                    const goalCard = document.createElement('div');
+                    goalCard.className = 'goal-card';
+                    goalCard.innerHTML = `
+                        <h3>${goal.title}</h3>
+                        <p><strong>Deadline:</strong> ${goal.deadline}</p>
+                        <p><strong>Status:</strong> ${goal.status}</p>
+                        <button onclick="viewGoalDetails(${goal.goal_id})">View Details</button>
+                    `;
+                    goalsList.appendChild(goalCard);
+                });
+            }
+        }
+
+        // View goal details with milestones
+        window.viewGoalDetails = async (goalId) => {
+            const result = await Goals.getDetail(goalId);
+            if (result.status === 'success') {
+                currentGoalId = goalId;
+                const goal = result.data;
+
+                document.getElementById('goalDetailsTitle').textContent = goal.title;
+                document.getElementById('goalDetailsDeadline').textContent = goal.deadline;
+                document.getElementById('goalDetailsStatus').textContent = goal.status;
+
+                const milestonesList = document.getElementById('milestonesList');
+                milestonesList.innerHTML = '';
+
+                if (goal.milestones && goal.milestones.length > 0) {
+                    goal.milestones.forEach(milestone => {
+                        const milestoneItem = document.createElement('div');
+                        milestoneItem.className = 'milestone-item';
+                        milestoneItem.innerHTML = `
+                            <input type="checkbox" ${milestone.status === 'completed' ? 'checked' : ''} 
+                                   onchange="toggleMilestone(${milestone.milestone_id}, this.checked)">
+                            <span>${milestone.title}</span>
+                            <button onclick="deleteMilestone(${milestone.milestone_id})">Delete</button>
+                        `;
+                        milestonesList.appendChild(milestoneItem);
+                    });
+                } else {
+                    milestonesList.innerHTML = '<p>No milestones yet</p>';
+                }
+
+                document.getElementById('goalDetails').style.display = 'block';
+            }
+        };
+
+        // Create new goal
+        document.getElementById('createGoalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('goalTitle').value;
+            const deadline = document.getElementById('goalDeadline').value;
+            const status = document.getElementById('goalStatus').value;
+
+            const result = await Goals.create(title, deadline, status);
+            if (result.status === 'success') {
+                UI.showMessage('Goal created successfully!', 'success');
+                document.getElementById('createGoalForm').reset();
+                await loadGoals();
+            } else {
+                UI.showMessage(result.message, 'error');
+            }
+        });
+
+        // Add milestone
+        document.getElementById('addMilestoneForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentGoalId) return;
+
+            const title = document.getElementById('milestoneTitle').value;
+            const result = await Milestones.add(currentGoalId, title);
+
+            if (result.status === 'success') {
+                UI.showMessage('Milestone added!', 'success');
+                document.getElementById('milestoneTitle').value = '';
+                await viewGoalDetails(currentGoalId);
+            } else {
+                UI.showMessage(result.message, 'error');
+            }
+        });
+
+        // Toggle milestone completion
+        window.toggleMilestone = async (milestoneId, isCompleted) => {
+            const status = isCompleted ? 'completed' : 'pending';
+            const result = await Milestones.update(milestoneId, { status });
+            if (result.status !== 'success') {
+                UI.showMessage(result.message, 'error');
+            }
+        };
+
+        // Delete milestone
+        window.deleteMilestone = async (milestoneId) => {
+            if (!confirm('Delete this milestone?')) return;
+
+            const result = await Milestones.delete(milestoneId);
+            if (result.status === 'success') {
+                await viewGoalDetails(currentGoalId);
+            } else {
+                UI.showMessage(result.message, 'error');
+            }
+        };
+
+        // Delete goal
+        document.getElementById('deleteGoalBtn').addEventListener('click', async () => {
+            if (!currentGoalId || !confirm('Delete this goal and all its milestones?')) return;
+
+            const result = await Goals.delete(currentGoalId);
+            if (result.status === 'success') {
+                UI.showMessage('Goal deleted!', 'success');
+                document.getElementById('goalDetails').style.display = 'none';
+                currentGoalId = null;
+                await loadGoals();
+            } else {
+                UI.showMessage(result.message, 'error');
+            }
+        });
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const result = await Auth.logout();
+            if (result.status === 'success') {
+                UI.clearCurrentUser();
+                UI.redirect('index.html');
+            }
+        });
+
+        // Initialize
+        (async () => {
+            if (await checkAuth()) {
+                await loadGoals();
+            }
+        })();
+    </script>
+</body>
+
+</html>
