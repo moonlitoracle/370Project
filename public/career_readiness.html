@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Career Readiness</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+    <nav>
+        <div class="logo">CareerRoadmap</div>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="careers.html">Careers</a></li>
+            <li><a href="career_readiness.html">Readiness</a></li>
+            <li><a href="#" id="logoutBtn">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>Career Readiness</h1>
+
+    <select id="careerSelect"></select>
+    <button class="btn" onclick="evaluate()">Evaluate</button>
+
+    <div id="result"></div>
+</main>
+
+<script src="js/app.js"></script>
+<script>
+async function checkAuth() {
+    const res = await Auth.checkSession();
+    if (res.status !== 'success') UI.redirect('login.html');
+}
+
+async function loadCareers() {
+    const res = await Career.list();
+    if (res.status === 'success') {
+        const sel = document.getElementById('careerSelect');
+        res.data.forEach(c =>
+            sel.innerHTML += `<option value="${c.career_id}">${c.name}</option>`
+        );
+    }
+}
+
+async function evaluate() {
+    const id = document.getElementById('careerSelect').value;
+    const res = await CareerReadiness.evaluate(id);
+
+    if (res.status === 'success') {
+        let html = `<h3>Match: ${res.data.match_percentage}%</h3>`;
+        if (res.data.missing_skills.length) {
+            html += `<h4>Skills to Improve:</h4>`;
+            res.data.missing_skills.forEach(s => {
+                html += `<p>${s.name} (Required: ${s.required_level}, Yours: ${s.user_level})</p>`;
+            });
+        }
+        document.getElementById('result').innerHTML = html;
+    }
+}
+
+(async () => {
+    await checkAuth();
+    await loadCareers();
+})();
+</script>
+
+</body>
+</html>
