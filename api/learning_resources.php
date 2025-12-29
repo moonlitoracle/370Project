@@ -23,24 +23,24 @@ function requireAuth() {
 
 /* LIST all resources */
 if ($method === 'GET' && $action === 'list') {
+    requireAuth();
     $stmt = $conn->query("
-        SELECT r.resource_id, r.title, r.url,
-               s.name AS skill,
-               rt.name AS type
+        SELECT r.res_id, r.name, r.url, r.type,
+               s.name AS skill
         FROM resources r
         JOIN skills s ON r.skill_id = s.skill_id
-        JOIN resource_types rt ON r.type_id = rt.type_id
     ");
     sendResponse('success', 'Resources retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
 /* GET resources for a specific skill */
 if ($method === 'GET' && $action === 'by_skill') {
+    requireAuth();
     $skillId = $_GET['skill_id'] ?? null;
     if (!$skillId) sendResponse('error', 'skill_id required');
 
     $stmt = $conn->prepare("
-        SELECT title, url
+        SELECT name, url, type
         FROM resources
         WHERE skill_id = ?
     ");

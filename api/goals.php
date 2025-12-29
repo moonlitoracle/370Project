@@ -43,7 +43,7 @@ if ($method === 'GET' && $action === 'detail') {
     $goal = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$goal) { sendResponse('error', 'Goal not found'); }
     // Milestones
-    $stmt = $conn->prepare("SELECT milestone_id, title, status FROM milestone WHERE goal_id = ?");
+    $stmt = $conn->prepare("SELECT milestone_id, title, status FROM milestones WHERE goal_id = ?");
     $stmt->execute([$goalId]);
     $milestones = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $goal['milestones'] = $milestones;
@@ -110,7 +110,7 @@ if ($method === 'DELETE' && $action === 'delete') {
 }
 
 // ---------- Milestones ---------- //
-// Add a milestone to a goal
+// Add a milestones to a goal
 if ($method === 'POST' && $action === 'add_milestone') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
@@ -122,52 +122,52 @@ if ($method === 'POST' && $action === 'add_milestone') {
     $stmt = $conn->prepare("SELECT goal_id FROM goals WHERE goal_id = ? AND user_id = ?");
     $stmt->execute([$goalId, $_SESSION['user_id']]);
     if (!$stmt->fetch()) { sendResponse('error', 'Goal not found or unauthorized'); }
-    $stmt = $conn->prepare("INSERT INTO milestone (goal_id, title, status) VALUES (?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO milestones (goal_id, title, status) VALUES (?, ?, ?)");
     try {
         $stmt->execute([$goalId, $title, $status]);
         $mid = $conn->lastInsertId();
         sendResponse('success', 'Milestone added', ['milestone_id' => $mid]);
     } catch (PDOException $e) {
-        sendResponse('error', 'Failed to add milestone');
+        sendResponse('error', 'Failed to add milestones');
     }
 }
 
-// Update a milestone
+// Update a milestones
 if (($method === 'PUT' || $method === 'POST') && $action === 'update_milestone') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
-    $milestoneId = $input['milestone_id'] ?? null;
-    if (!$milestoneId) { sendResponse('error', 'milestone_id required'); }
+    $milestonesId = $input['milestone_id'] ?? null;
+    if (!$milestonesId) { sendResponse('error', 'milestone_id required'); }
     $fields = [];
     $params = [];
     if (isset($input['title'])) { $fields[] = 'title = ?'; $params[] = $input['title']; }
     if (isset($input['status'])) { $fields[] = 'status = ?'; $params[] = $input['status']; }
     if (empty($fields)) { sendResponse('error', 'No fields to update'); }
-    // Ensure milestone belongs to user's goal
-    $stmt = $conn->prepare("SELECT m.milestone_id FROM milestone m JOIN goals g ON m.goal_id = g.goal_id WHERE m.milestone_id = ? AND g.user_id = ?");
-    $stmt->execute([$milestoneId, $_SESSION['user_id']]);
+    // Ensure milestones belongs to user's goal
+    $stmt = $conn->prepare("SELECT m.milestone_id FROM milestones m JOIN goals g ON m.goal_id = g.goal_id WHERE m.milestone_id = ? AND g.user_id = ?");
+    $stmt->execute([$milestonesId, $_SESSION['user_id']]);
     if (!$stmt->fetch()) { sendResponse('error', 'Milestone not found or unauthorized'); }
-    $params[] = $milestoneId;
-    $sql = "UPDATE milestone SET " . implode(', ', $fields) . " WHERE milestone_id = ?";
+    $params[] = $milestonesId;
+    $sql = "UPDATE milestones SET " . implode(', ', $fields) . " WHERE milestone_id = ?";
     $stmt = $conn->prepare($sql);
     try {
         $stmt->execute($params);
         sendResponse('success', 'Milestone updated');
     } catch (PDOException $e) {
-        sendResponse('error', 'Failed to update milestone');
+        sendResponse('error', 'Failed to update milestones');
     }
 }
 
-// Delete a milestone
+// Delete a milestones
 if ($method === 'DELETE' && $action === 'delete_milestone') {
     requireAuth();
     $mid = $_GET['id'] ?? null;
     if (!$mid) { sendResponse('error', 'Milestone ID required'); }
     // Verify ownership
-    $stmt = $conn->prepare("SELECT m.milestone_id FROM milestone m JOIN goals g ON m.goal_id = g.goal_id WHERE m.milestone_id = ? AND g.user_id = ?");
+    $stmt = $conn->prepare("SELECT m.milestone_id FROM milestones m JOIN goals g ON m.goal_id = g.goal_id WHERE m.milestone_id = ? AND g.user_id = ?");
     $stmt->execute([$mid, $_SESSION['user_id']]);
     if (!$stmt->fetch()) { sendResponse('error', 'Milestone not found or unauthorized'); }
-    $stmt = $conn->prepare("DELETE FROM milestone WHERE milestone_id = ?");
+    $stmt = $conn->prepare("DELETE FROM milestones WHERE milestone_id = ?");
     try {
         $stmt->execute([$mid]);
         sendResponse('success', 'Milestone deleted');
