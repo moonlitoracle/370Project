@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Progress Tracking</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+    <nav>
+        <div class="logo">CareerRoadmap</div>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="progress.html">Progress</a></li>
+            <li><a href="#" id="logoutBtn">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>Your Growth</h1>
+
+    <h2>User Level: <span id="userLevel"></span></h2>
+
+    <h3>Skill Progress</h3>
+    <div id="skillsBox"></div>
+</main>
+
+<script src="js/app.js"></script>
+<script>
+async function loadProgress() {
+    const res = await Progress.get();
+    if (res.status === 'success') {
+        document.getElementById('userLevel').textContent = res.data.user_level;
+
+        const box = document.getElementById('skillsBox');
+        box.innerHTML = '';
+        res.data.skills.forEach(s => {
+            box.innerHTML += `<p>${s.name} — Level ${s.level}</p>`;
+        });
+    }
+}
+
+(async () => {
+    const auth = await Auth.checkSession();
+    if (auth.status !== 'success') UI.redirect('login.html');
+    await loadProgress();
+})();
+</script>
+
+</body>
+</html>
