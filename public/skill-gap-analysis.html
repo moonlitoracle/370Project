@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Gap Analysis - Career Roadmap</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 10px; }
+        .back-link { display: block; text-align: center; margin-bottom: 40px; color: #3498db; text-decoration: none; }
+        .overall { text-align: center; background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 40px; border-radius: 16px; font-size: 1.8em; box-shadow: 0 8px 25px rgba(52,152,219,0.3); }
+        .overall .percent { font-size: 4em; font-weight: bold; margin: 10px 0; }
+        .career-card { background: white; padding: 25px; margin: 25px 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .career-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .career-header h2 { margin: 0; color: #2c3e50; }
+        .match { font-size: 2.2em; font-weight: bold; }
+        .green { color: #27ae60; }
+        .yellow { color: #f39c12; }
+        .red { color: #e74c3c; }
+        .gaps { margin-top: 20px; }
+        .gap-item { background: #fdf2f2; padding: 15px; margin: 10px 0; border-left: 6px solid #e74c3c; border-radius: 8px; }
+        .ready { color: #27ae60; font-size: 1.3em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Skill Gap Analysis</h1>
+        <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+
+        <div class="overall">
+            <div>Overall Career Readiness</div>
+            <div class="percent">68%</div>
+        </div>
+
+        <div class="career-card">
+            <div class="career-header">
+                <h2>Full Stack Developer</h2>
+                <div class="match yellow">72%</div>
+            </div>
+            <div class="gaps">
+                <div class="gap-item">
+                    <strong>React</strong><br>
+                    Required: <strong>Advanced</strong> | Your level: <em>Intermediate</em>
+                </div>
+                <div class="gap-item">
+                    <strong>Node.js</strong><br>
+                    Required: <strong>Intermediate</strong> | Your level: <em>Beginner</em>
+                </div>
+            </div>
+        </div>
+
+        <div class="career-card">
+            <div class="career-header">
+                <h2>Data Analyst</h2>
+                <div class="match green">85%</div>
+            </div>
+            <p class="ready">✓ You're well-prepared for this career!</p>
+        </div>
+
+        <div class="career-card">
+            <div class="career-header">
+                <h2>DevOps Engineer</h2>
+                <div class="match red">45%</div>
+            </div>
+            <div class="gaps">
+                <div class="gap-item">
+                    <strong>Docker</strong><br>Required: <strong>Advanced</strong> | Your level: <em>None</em>
+                </div>
+                <div class="gap-item">
+                    <strong>AWS</strong><br>Required: <strong>Intermediate</strong> | Your level: <em>Beginner</em>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
