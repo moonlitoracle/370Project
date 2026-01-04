@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Career Roadmap</title>
+    <title>Dashboard - CareerRoadmap</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -16,30 +16,64 @@
                 <li><a href="dashboard.html">Dashboard</a></li>
                 <li><a href="careers.html">Careers</a></li>
                 <li><a href="goals.html">Goals</a></li>
-                <li><a href="#" id="logoutBtn">Logout</a></li>
+                <li><a href="skill-management.html">Skills</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="#" id="logoutBtn" class="btn btn-secondary">Logout</a></li>
             </ul>
         </nav>
     </header>
 
     <main class="dashboard-container">
-        <h1>Welcome, <span id="userName">User</span>!</h1>
+        <h1>Welcome, <span id="userName">User</span>! 👋</h1>
+
+        <section class="dashboard-section">
+            <h2>Your Stats</h2>
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="userLevel">1</div>
+                    <div class="stat-label">Current Level</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Goals Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Skills Acquired</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0%</div>
+                    <div class="stat-label">Career Readiness</div>
+                </div>
+            </div>
+        </section>
 
         <section class="dashboard-section">
             <h2>Your Profile</h2>
-            <div id="profileInfo">
-                <p><strong>Email:</strong> <span id="userEmail"></span></p>
-                <p><strong>Level:</strong> <span id="userLevel"></span></p>
+            <div class="card">
+                <div class="card-body">
+                    <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+                    <p><strong>Member Since:</strong> <span id="memberSince">2025</span></p>
+                    <p style="margin-bottom: 0;"><strong>Account Level:</strong> <span
+                            id="userLevelText">Beginner</span></p>
+                </div>
             </div>
         </section>
 
         <section class="dashboard-section">
             <h2>Quick Actions</h2>
             <div class="action-buttons">
-                <a href="careers.html" class="btn">Explore Careers</a>
-                <a href="goals.html" class="btn">Manage Goals</a>
+                <a href="careers.html" class="btn btn-primary">Explore Careers</a>
+                <a href="goals.html" class="btn btn-primary">Manage Goals</a>
+                <a href="skill-management.html" class="btn btn-secondary">Track Skills</a>
+                <a href="resources.html" class="btn btn-secondary">Browse Resources</a>
             </div>
         </section>
     </main>
+
+    <footer>
+        <p>&copy; 2025 CareerRoadmap. Empowering careers, one skill at a time.</p>
+    </footer>
 
     <script src="js/app.js"></script>
     <script>
@@ -61,6 +95,7 @@
                 document.getElementById('userName').textContent = user.name;
                 document.getElementById('userEmail').textContent = user.email;
                 document.getElementById('userLevel').textContent = user.level;
+                document.getElementById('userLevelText').textContent = `Level ${user.level}`;
                 UI.setCurrentUser(user);
             }
         }

@@ -162,6 +162,46 @@ const Milestones = {
     }
 };
 
+// ========== Skills API ========== //
+const Skills = {
+    // Get all available skills (for dropdown)
+    getAll: async () => {
+        return await apiCall('/skills.php?action=all', {
+            method: 'GET'
+        });
+    },
+
+    // Get user's skills
+    list: async () => {
+        return await apiCall('/skills.php?action=list', {
+            method: 'GET'
+        });
+    },
+
+    // Add a skill to user
+    add: async (skillId, proficiency = 'Beginner') => {
+        return await apiCall('/skills.php?action=add', {
+            method: 'POST',
+            body: JSON.stringify({ skill_id: skillId, proficiency })
+        });
+    },
+
+    // Update user's skill proficiency
+    update: async (skillId, proficiency) => {
+        return await apiCall('/skills.php?action=update', {
+            method: 'POST',
+            body: JSON.stringify({ skill_id: skillId, proficiency })
+        });
+    },
+
+    // Remove a skill from user
+    delete: async (skillId) => {
+        return await apiCall(`/skills.php?action=delete&skill_id=${skillId}`, {
+            method: 'DELETE'
+        });
+    }
+};
+
 // ========== Learning Resources API ========== //
 const Resources = {
     // Get resources for a specific skill

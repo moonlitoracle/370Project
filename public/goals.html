@@ -16,61 +16,72 @@
                 <li><a href="dashboard.html">Dashboard</a></li>
                 <li><a href="careers.html">Careers</a></li>
                 <li><a href="goals.html">Goals</a></li>
-                <li><a href="#" id="logoutBtn">Logout</a></li>
+                <li><a href="skill-management.html">Skills</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="#" id="logoutBtn" class="btn btn-secondary">Logout</a></li>
             </ul>
         </nav>
     </header>
 
-    <main class="goals-container">
-        <h1>Goal Management</h1>
+    <main class="dashboard-container">
+        <h1>Your Goals 🎯</h1>
 
-        <section class="create-goal">
+        <section class="dashboard-section">
             <h2>Create New Goal</h2>
-            <form id="createGoalForm">
-                <div class="form-group">
-                    <label for="goalTitle">Goal Title</label>
-                    <input type="text" id="goalTitle" required>
-                </div>
-                <div class="form-group">
-                    <label for="goalDeadline">Deadline</label>
-                    <input type="date" id="goalDeadline" required>
-                </div>
-                <div class="form-group">
-                    <label for="goalStatus">Status</label>
-                    <select id="goalStatus">
-                        <option value="pending">Pending</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">Create Goal</button>
-            </form>
+            <div class="card">
+                <form id="createGoalForm">
+                    <div class="form-group">
+                        <label for="goalTitle">Goal Title</label>
+                        <input type="text" id="goalTitle" placeholder="e.g., Master React" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalDeadline">Deadline</label>
+                        <input type="date" id="goalDeadline" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalStatus">Status</label>
+                        <select id="goalStatus">
+                            <option value="pending">Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Goal</button>
+                </form>
+            </div>
         </section>
 
-        <section class="goals-list">
+        <section class="dashboard-section">
             <h2>Your Goals</h2>
-            <div id="goalsList"></div>
+            <div id="goalsList" class="dashboard-grid"></div>
         </section>
 
-        <section class="goal-details" id="goalDetails" style="display: none;">
-            <h2 id="goalDetailsTitle"></h2>
-            <p><strong>Deadline:</strong> <span id="goalDetailsDeadline"></span></p>
-            <p><strong>Status:</strong> <span id="goalDetailsStatus"></span></p>
+        <section class="dashboard-section" id="goalDetails" style="display: none;">
+            <div class="card">
+                <h2 id="goalDetailsTitle"></h2>
+                <p><strong>Deadline:</strong> <span id="goalDetailsDeadline"></span></p>
+                <p><strong>Status:</strong> <span id="goalDetailsStatus"></span></p>
 
-            <h3>Milestones</h3>
-            <div id="milestonesList"></div>
+                <h3 style="margin-top: var(--space-xl);">Milestones</h3>
+                <div id="milestonesList" style="margin-bottom: var(--space-xl);"></div>
 
-            <h3>Add Milestone</h3>
-            <form id="addMilestoneForm">
-                <div class="form-group">
-                    <input type="text" id="milestoneTitle" placeholder="Milestone title" required>
-                </div>
-                <button type="submit" class="btn">Add Milestone</button>
-            </form>
+                <h3>Add Milestone</h3>
+                <form id="addMilestoneForm">
+                    <div class="form-group">
+                        <input type="text" id="milestoneTitle" placeholder="Milestone title" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Milestone</button>
+                </form>
 
-            <button id="deleteGoalBtn" class="btn btn-danger">Delete Goal</button>
+                <button id="deleteGoalBtn" class="btn btn-secondary" style="margin-top: var(--space-lg);">Delete
+                    Goal</button>
+            </div>
         </section>
     </main>
+
+    <footer>
+        <p>&copy; 2025 CareerRoadmap. Empowering careers, one skill at a time.</p>
+    </footer>
 
     <script src="js/app.js"></script>
     <script>
@@ -100,12 +111,13 @@
 
                 result.data.forEach(goal => {
                     const goalCard = document.createElement('div');
-                    goalCard.className = 'goal-card';
+                    goalCard.className = 'card';
+                    goalCard.style.cursor = 'pointer';
                     goalCard.innerHTML = `
                         <h3>${goal.title}</h3>
                         <p><strong>Deadline:</strong> ${goal.deadline}</p>
-                        <p><strong>Status:</strong> ${goal.status}</p>
-                        <button onclick="viewGoalDetails(${goal.goal_id})">View Details</button>
+                        <p style="margin-bottom: var(--space-md);"><strong>Status:</strong> <span style="color: var(--color-accent);">${goal.status}</span></p>
+                        <button class="btn btn-primary" onclick="viewGoalDetails(${goal.goal_id})">View Details</button>
                     `;
                     goalsList.appendChild(goalCard);
                 });

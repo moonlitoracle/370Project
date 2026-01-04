@@ -4,8 +4,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Careers - Career Roadmap</title>
+    <title>Careers - CareerRoadmap</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .careers-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-2xl);
+        }
+
+        .careers-container>h1 {
+            margin-bottom: var(--space-2xl);
+        }
+
+        .careers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--space-xl);
+            margin-bottom: var(--space-3xl);
+        }
+
+        .career-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .career-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(108, 99, 255, 0.3);
+        }
+
+        .career-card h3 {
+            margin-bottom: var(--space-md);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .career-card p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .career-card button {
+            width: 100%;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--gradient-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            margin: var(--space-xs);
+            font-size: var(--font-size-sm);
+            color: var(--color-accent);
+            font-weight: var(--font-weight-medium);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: var(--z-modal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-2xl);
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: var(--space-xl);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: var(--font-size-2xl);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 2rem;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base);
+        }
+
+        .modal-close:hover {
+            background: var(--glass-bg);
+            color: var(--color-text-primary);
+        }
+
+        .modal-body {
+            padding: var(--space-xl);
+        }
+
+        .modal-body h3 {
+            margin-top: var(--space-xl);
+            margin-bottom: var(--space-md);
+        }
+
+        .modal-footer {
+            padding: var(--space-xl);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: var(--space-md);
+            justify-content: flex-end;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -16,27 +195,45 @@
                 <li><a href="dashboard.html">Dashboard</a></li>
                 <li><a href="careers.html">Careers</a></li>
                 <li><a href="goals.html">Goals</a></li>
-                <li><a href="#" id="logoutBtn">Logout</a></li>
+                <li><a href="skill-management.html">Skills</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="#" id="logoutBtn" class="btn btn-secondary">Logout</a></li>
             </ul>
         </nav>
     </header>
 
     <main class="careers-container">
-        <h1>Explore Careers</h1>
+        <h1>Explore Career Paths 🚀</h1>
 
-        <section class="careers-list">
+        <section>
             <h2>Available Careers</h2>
-            <div id="careersList"></div>
+            <div id="careersList" class="careers-grid"></div>
         </section>
 
-        <section class="career-details" id="careerDetails" style="display: none;">
-            <h2 id="careerName"></h2>
-            <p id="careerOverview"></p>
-            <h3>Required Skills</h3>
-            <div id="requiredSkills"></div>
-            <button id="selectCareerBtn" class="btn">Select This Career</button>
-        </section>
+        <!-- Career Details Modal -->
+        <div id="careerModal" class="modal" style="display: none;">
+            <div class="modal-backdrop" onclick="closeCareerModal()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="careerName"></h2>
+                    <button class="modal-close" onclick="closeCareerModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="careerOverview"></p>
+                    <h3>Required Skills</h3>
+                    <div id="requiredSkills"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="selectCareerBtn" class="btn btn-primary">Select This Career</button>
+                    <button class="btn btn-secondary" onclick="closeCareerModal()">Close</button>
+                </div>
+            </div>
+        </div>
     </main>
+
+    <footer>
+        <p>&copy; 2025 CareerRoadmap. Empowering careers, one skill at a time.</p>
+    </footer>
 
     <script src="js/app.js"></script>
     <script>
@@ -65,7 +262,7 @@
                     careerCard.innerHTML = `
                         <h3>${career.name}</h3>
                         <p>${career.overview || 'No description available'}</p>
-                        <button onclick="viewCareerDetails(${career.career_id})">View Details</button>
+                        <button class="btn btn-primary" onclick="viewCareerDetails(${career.career_id})">View Details</button>
                     `;
                     careersList.appendChild(careerCard);
                 });
@@ -74,33 +271,50 @@
 
         // View career details
         window.viewCareerDetails = async (careerId) => {
-            const result = await Career.getDetails(careerId);
-            if (result.status === 'success') {
-                selectedCareerId = careerId;
-                const career = result.data;
+            console.log('View Details clicked for career ID:', careerId);
 
-                document.getElementById('careerName').textContent = career.name;
-                document.getElementById('careerOverview').textContent = career.overview || 'No description available';
+            try {
+                const result = await Career.getDetails(careerId);
+                console.log('API Result:', result);
 
-                const skillsList = document.getElementById('requiredSkills');
-                skillsList.innerHTML = '';
+                if (result.status === 'success') {
+                    selectedCareerId = careerId;
+                    const career = result.data;
 
-                if (career.required_skills && career.required_skills.length > 0) {
-                    career.required_skills.forEach(skill => {
-                        const skillItem = document.createElement('div');
-                        skillItem.className = 'skill-item';
-                        skillItem.innerHTML = `
-                            <strong>${skill.name}</strong> - Required Level: ${skill.level}
-                            <p>${skill.description || ''}</p>
-                        `;
-                        skillsList.appendChild(skillItem);
-                    });
+                    document.getElementById('careerName').textContent = career.name;
+                    document.getElementById('careerOverview').textContent = career.overview || 'No description available';
+
+                    const skillsList = document.getElementById('requiredSkills');
+                    skillsList.innerHTML = '';
+
+                    if (career.required_skills && career.required_skills.length > 0) {
+                        career.required_skills.forEach(skill => {
+                            const skillTag = document.createElement('span');
+                            skillTag.className = 'skill-tag';
+                            skillTag.textContent = `${skill.name} (${skill.level})`;
+                            skillsList.appendChild(skillTag);
+                        });
+                    } else {
+                        skillsList.innerHTML = '<p>No specific skills required</p>';
+                    }
+
+                    document.getElementById('careerModal').style.display = 'flex';
+                    // Prevent body scroll when modal is open
+                    document.body.style.overflow = 'hidden';
                 } else {
-                    skillsList.innerHTML = '<p>No specific skills required</p>';
+                    console.error('API Error:', result.message);
+                    alert('Error: ' + result.message);
                 }
-
-                document.getElementById('careerDetails').style.display = 'block';
+            } catch (error) {
+                console.error('Failed to load career details:', error);
+                alert('Failed to load career details. Check console for details.');
             }
+        };
+
+        // Close career modal
+        window.closeCareerModal = () => {
+            document.getElementById('careerModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
         };
 
         // Select career

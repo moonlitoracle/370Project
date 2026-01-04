@@ -21,6 +21,12 @@ function requireAuth() {
     }
 }
 
+// LIST all available skills (for dropdown)
+if ($method === 'GET' && $action === 'all') {
+    $stmt = $conn->query("SELECT skill_id, name, description FROM skills ORDER BY name");
+    sendResponse('success', 'All skills retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
 // LIST user's skills
 if ($method === 'GET' && $action === 'list') {
     requireAuth();
