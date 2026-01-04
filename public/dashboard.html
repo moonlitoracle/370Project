@@ -17,6 +17,8 @@
                 <li><a href="careers.html">Careers</a></li>
                 <li><a href="goals.html">Goals</a></li>
                 <li><a href="skill-management.html">Skills</a></li>
+                <li><a href="skill-gap-analysis.html">Gap Analysis</a></li>
+                <li><a href="progress-tracking.html">Progress</a></li>
                 <li><a href="resources.html">Resources</a></li>
                 <li><a href="#" id="logoutBtn" class="btn btn-secondary">Logout</a></li>
             </ul>
@@ -33,16 +35,19 @@
                     <div class="stat-value" id="userLevel">1</div>
                     <div class="stat-label">Current Level</div>
                 </div>
+                <!-- ID added for dynamic update -->
                 <div class="stat-card">
-                    <div class="stat-value">0</div>
+                    <div class="stat-value" id="goalsCompleted">0</div>
                     <div class="stat-label">Goals Completed</div>
                 </div>
+                <!-- ID added for dynamic update -->
                 <div class="stat-card">
-                    <div class="stat-value">0</div>
+                    <div class="stat-value" id="skillsAcquired">0</div>
                     <div class="stat-label">Skills Acquired</div>
                 </div>
+                <!-- ID added for dynamic update -->
                 <div class="stat-card">
-                    <div class="stat-value">0%</div>
+                    <div class="stat-value" id="careerReadiness">0%</div>
                     <div class="stat-label">Career Readiness</div>
                 </div>
             </div>
@@ -114,6 +119,27 @@
             }
         }
 
+        // Load dashboard stats from Progress API and Skill Gap API
+        async function loadDashboardStats() {
+            // 1. Get Progress Stats (Level, Goals, Skills)
+            const progressRes = await Progress.get();
+            if (progressRes.status === 'success') {
+                const p = progressRes.data;
+                // We typically use 'skills_tracked' as 'Skills Acquired' or strictly 'skills where proficiency > Beginner'
+                // For now, let's use skills_tracked as "Skills"
+                document.getElementById('skillsAcquired').textContent = p.skills_tracked || 0;
+                document.getElementById('goalsCompleted').textContent = p.goals_completed || 0;
+            }
+
+            // 2. Get Career Readiness
+            // We'll fetch the overall match percentage from the new SkillGap service
+            const gapRes = await SkillGap.analyze();
+            if (gapRes.status === 'success') {
+                const g = gapRes.data;
+                document.getElementById('careerReadiness').textContent = (g.overall_match_percentage || 0) + '%';
+            }
+        }
+
         // Logout handler
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {
             e.preventDefault();
@@ -161,6 +187,7 @@
         (async () => {
             if (await checkAuth()) {
                 await loadProfile();
+                await loadDashboardStats(); // NEW: Load dynamic stats
                 await loadDashboardSkills();
                 await loadTestHistory();
             }

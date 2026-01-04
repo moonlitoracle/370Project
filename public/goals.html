@@ -17,6 +17,8 @@
                 <li><a href="careers.html">Careers</a></li>
                 <li><a href="goals.html">Goals</a></li>
                 <li><a href="skill-management.html">Skills</a></li>
+                <li><a href="skill-gap-analysis.html">Gap Analysis</a></li>
+                <li><a href="progress-tracking.html">Progress</a></li>
                 <li><a href="resources.html">Resources</a></li>
                 <li><a href="#" id="logoutBtn" class="btn btn-secondary">Logout</a></li>
             </ul>
@@ -73,7 +75,13 @@
                     <button type="submit" class="btn btn-primary">Add Milestone</button>
                 </form>
 
-                <button id="deleteGoalBtn" class="btn btn-secondary" style="margin-top: var(--space-lg);">Delete
+                <button id="markCompletedBtn" class="btn btn-primary"
+                    style="margin-top: var(--space-lg); background: var(--color-success); border-color: var(--color-success);">
+                    Mark as Completed
+                </button>
+
+                <button id="deleteGoalBtn" class="btn btn-secondary"
+                    style="margin-top: var(--space-lg); margin-left: var(--space-md);">Delete
                     Goal</button>
             </div>
         </section>
@@ -212,6 +220,25 @@
                 UI.showMessage(result.message, 'error');
             }
         };
+
+        // Mark goal as completed
+        document.getElementById('markCompletedBtn').addEventListener('click', async () => {
+            if (!currentGoalId) return;
+
+            const result = await Goals.update(currentGoalId, { status: 'completed' });
+            if (result.status === 'success') {
+                UI.showMessage('Goal completed! 🎉', 'success');
+                // Refresh details to show update status
+                const detailsRes = await Goals.getDetail(currentGoalId);
+                if (detailsRes.status === 'success') {
+                    document.getElementById('goalDetailsStatus').textContent = detailsRes.data.status;
+                }
+                // Refresh list
+                await loadGoals();
+            } else {
+                UI.showMessage(result.message, 'error');
+            }
+        });
 
         // Delete goal
         document.getElementById('deleteGoalBtn').addEventListener('click', async () => {

@@ -270,6 +270,16 @@ const Progress = {
     }
 };
 
+// ========== Skill Gap API ========== //
+const SkillGap = {
+    // Get skill gap analysis for all user careers
+    analyze: async () => {
+        return await apiCall('/skill_gap.php', {
+            method: 'GET'
+        });
+    }
+};
+
 // ========== UI Helper Functions ========== //
 const UI = {
     // Show message to user
@@ -303,5 +313,5 @@ const UI = {
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { Auth, User, Career, Goals, Milestones, Resources, CareerReadiness, Insights, Progress, UI };
+    module.exports = { Auth, User, Career, Goals, Milestones, Resources, CareerReadiness, Insights, Progress, SkillGap, UI };
 }

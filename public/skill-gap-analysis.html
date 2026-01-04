@@ -1,77 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Gap Analysis - Career Roadmap</title>
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 10px; }
-        .back-link { display: block; text-align: center; margin-bottom: 40px; color: #3498db; text-decoration: none; }
-        .overall { text-align: center; background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 40px; border-radius: 16px; font-size: 1.8em; box-shadow: 0 8px 25px rgba(52,152,219,0.3); }
-        .overall .percent { font-size: 4em; font-weight: bold; margin: 10px 0; }
-        .career-card { background: white; padding: 25px; margin: 25px 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .career-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .career-header h2 { margin: 0; color: #2c3e50; }
-        .match { font-size: 2.2em; font-weight: bold; }
-        .green { color: #27ae60; }
-        .yellow { color: #f39c12; }
-        .red { color: #e74c3c; }
-        .gaps { margin-top: 20px; }
-        .gap-item { background: #fdf2f2; padding: 15px; margin: 10px 0; border-left: 6px solid #e74c3c; border-radius: 8px; }
-        .ready { color: #27ae60; font-size: 1.3em; font-weight: bold; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .overall {
+            text-align: center;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            font-size: 1.8em;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .overall .percent {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .career-card {
+            background: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .career-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .career-header h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .match {
+            font-size: 2.2em;
+            font-weight: bold;
+        }
+
+        .green {
+            color: #27ae60;
+        }
+
+        .yellow {
+            color: #f39c12;
+        }
+
+        .red {
+            color: #e74c3c;
+        }
+
+        .gaps {
+            margin-top: 20px;
+        }
+
+        .gap-item {
+            background: #fdf2f2;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 6px solid #e74c3c;
+            border-radius: 8px;
+        }
+
+        .ready {
+            color: #27ae60;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .no-careers {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
     </style>
 </head>
+
 <body>
+    <header>
+        <nav>
+            <div class="logo">CareerRoadmap</div>
+            <ul>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="careers.html">Careers</a></li>
+                <li><a href="goals.html">Goals</a></li>
+                <li><a href="skill-management.html">Skills</a></li>
+                <li><a href="skill-gap-analysis.html">Gap Analysis</a></li>
+                <li><a href="progress-tracking.html">Progress</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="#" id="logoutBtn" class="btn btn-secondary">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
     <div class="container">
         <h1>Skill Gap Analysis</h1>
-        <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
 
-        <div class="overall">
-            <div>Overall Career Readiness</div>
-            <div class="percent">68%</div>
-        </div>
-
-        <div class="career-card">
-            <div class="career-header">
-                <h2>Full Stack Developer</h2>
-                <div class="match yellow">72%</div>
-            </div>
-            <div class="gaps">
-                <div class="gap-item">
-                    <strong>React</strong><br>
-                    Required: <strong>Advanced</strong> | Your level: <em>Intermediate</em>
-                </div>
-                <div class="gap-item">
-                    <strong>Node.js</strong><br>
-                    Required: <strong>Intermediate</strong> | Your level: <em>Beginner</em>
-                </div>
-            </div>
-        </div>
-
-        <div class="career-card">
-            <div class="career-header">
-                <h2>Data Analyst</h2>
-                <div class="match green">85%</div>
-            </div>
-            <p class="ready">✓ You're well-prepared for this career!</p>
-        </div>
-
-        <div class="career-card">
-            <div class="career-header">
-                <h2>DevOps Engineer</h2>
-                <div class="match red">45%</div>
-            </div>
-            <div class="gaps">
-                <div class="gap-item">
-                    <strong>Docker</strong><br>Required: <strong>Advanced</strong> | Your level: <em>None</em>
-                </div>
-                <div class="gap-item">
-                    <strong>AWS</strong><br>Required: <strong>Intermediate</strong> | Your level: <em>Beginner</em>
-                </div>
-            </div>
+        <div id="content">
+            <div style="text-align: center; padding: 40px;">Loading...</div>
         </div>
     </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        async function loadAnalysis() {
+            const res = await SkillGap.analyze();
+            const container = document.getElementById('content');
+
+            if (res.status === 'success') {
+                const data = res.data;
+                const overall = data.overall_match_percentage;
+                const careers = data.career_gaps;
+
+                if (careers.length === 0) {
+                    container.innerHTML = `
+                        <div class="career-card no-careers">
+                            <h2>No Careers Selected</h2>
+                            <p>You haven't selected any target careers yet.</p>
+                            <a href="careers.html" class="btn btn-primary">Browse Careers</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                    <div class="overall">
+                        <div>Overall Career Readiness</div>
+                        <div class="percent">${overall}%</div>
+                    </div>
+                `;
+
+                careers.forEach(c => {
+                    let colorClass = 'red';
+                    if (c.match_percentage >= 80) colorClass = 'green';
+                    else if (c.match_percentage >= 50) colorClass = 'yellow';
+
+                    html += `
+                        <div class="career-card">
+                            <div class="career-header">
+                                <h2>${c.career_name}</h2>
+                                <div class="match ${colorClass}">${c.match_percentage}%</div>
+                            </div>
+                    `;
+
+                    if (c.missing_skills.length === 0) {
+                        html += `<p class="ready">✓ You're well-prepared for this career!</p>`;
+                    } else {
+                        html += `<div class="gaps">`;
+                        c.missing_skills.forEach(s => {
+                            html += `
+                                <div class="gap-item">
+                                    <strong>${s.name}</strong><br>
+                                    Required: <strong>${s.required_level}</strong> | Your level: <em>${s.user_level}</em>
+                                </div>
+                            `;
+                        });
+                        html += `</div>`;
+                    }
+                    html += `</div>`;
+                });
+
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `<p style="text-align:center; color:red">Error loading data: ${res.message}</p>`;
+            }
+        }
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const result = await Auth.logout();
+            if (result.status === 'success') {
+                UI.clearCurrentUser();
+                UI.redirect('index.html');
+            }
+        });
+
+        (async () => {
+            if (await Auth.checkSession().then(r => r.status === 'success')) {
+                await loadAnalysis();
+            } else {
+                window.location.href = 'login.html';
+            }
+        })();
+    </script>
 </body>
+
 </html>

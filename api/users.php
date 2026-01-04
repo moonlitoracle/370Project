@@ -28,7 +28,17 @@ if ($method === 'GET') {
     
     $userId = $_SESSION['user_id'];
     
-    $stmt = $conn->prepare("SELECT user_id, name, email, level, created_at FROM users WHERE user_id = ?");
+    $userId = $_SESSION['user_id'];
+    
+    $stmt = $conn->prepare("
+        SELECT 
+            u.user_id, u.name, u.email, u.level, u.created_at,
+            (SELECT COUNT(*) FROM user_skills WHERE user_id = u.user_id) as skills_tracked,
+            (SELECT COUNT(*) FROM goals WHERE user_id = u.user_id AND status = 'completed') as goals_completed,
+            (SELECT COUNT(*) FROM goals WHERE user_id = u.user_id) as goals_total
+        FROM users u 
+        WHERE u.user_id = ?
+    ");
     $stmt->execute([$userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
