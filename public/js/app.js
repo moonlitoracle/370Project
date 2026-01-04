@@ -1,5 +1,6 @@
 // API Base Configuration
-const API_BASE = '/api';
+// Using relative path to allow for subdirectories (e.g., localhost/careerroadmap/)
+const API_BASE = '../api';
 
 // Helper function for API calls
 async function apiCall(endpoint, options = {}) {
