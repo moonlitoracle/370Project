@@ -175,6 +175,10 @@ if ($method === 'POST' && $action === 'submit_test') {
             ");
             $stmt->execute([$userId, $skillId, $level]);
         }
+
+        // TRIGGER LEVEL UPDATE
+        require_once 'utils.php';
+        updateUserLevel($userId, $conn);
     }
     
     sendResponse('success', $passed ? 'Test passed! Proficiency updated.' : 'Test failed. Try again!', [

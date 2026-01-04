@@ -73,3 +73,41 @@ CREATE TABLE IF NOT EXISTS resources (
     url TEXT,
     FOREIGN KEY (skill_id) REFERENCES skills(skill_id) ON DELETE CASCADE
 );
+
+CREATE TABLE proficiency_tests (
+    test_id INT PRIMARY KEY AUTO_INCREMENT,
+    skill_id INT NOT NULL,
+    required_level ENUM('Beginner', 'Intermediate', 'Advanced', 'Expert') NOT NULL,
+    test_title VARCHAR(255) NOT NULL,
+    passing_score INT DEFAULT 70,
+    time_limit_minutes INT DEFAULT 30,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (skill_id) REFERENCES skills(skill_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_skill_level (skill_id, required_level)
+);
+
+CREATE TABLE test_questions (
+    question_id INT PRIMARY KEY AUTO_INCREMENT,
+    test_id INT NOT NULL,
+    question_text TEXT NOT NULL,
+    option_a VARCHAR(500) NOT NULL,
+    option_b VARCHAR(500) NOT NULL,
+    option_c VARCHAR(500) NOT NULL,
+    option_d VARCHAR(500) NOT NULL,
+    correct_answer ENUM('A', 'B', 'C', 'D') NOT NULL,
+    points INT DEFAULT 10,
+    FOREIGN KEY (test_id) REFERENCES proficiency_tests(test_id) ON DELETE CASCADE
+);
+
+CREATE TABLE test_attempts (
+    attempt_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    test_id INT NOT NULL,
+    score INT NOT NULL,
+    total_points INT NOT NULL,
+    passed BOOLEAN NOT NULL,
+    answers JSON,
+    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (test_id) REFERENCES proficiency_tests(test_id) ON DELETE CASCADE
+);

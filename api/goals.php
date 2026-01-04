@@ -89,6 +89,13 @@ if (($method === 'PUT' || $method === 'POST') && $action === 'update') {
     $stmt = $conn->prepare($sql);
     try {
         $stmt->execute($params);
+        
+        // TRIGGER LEVEL UPDATE IF COMPLETED
+        if (isset($input['status']) && $input['status'] === 'completed') {
+            require_once 'utils.php';
+            updateUserLevel($_SESSION['user_id'], $conn);
+        }
+
         sendResponse('success', 'Goal updated');
     } catch (PDOException $e) {
         sendResponse('error', 'Failed to update goal');

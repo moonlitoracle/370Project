@@ -4,3 +4,4 @@ node_modules/
 config/db.php
 *.log
 .DS_Store
+verification_report.md
