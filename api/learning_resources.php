@@ -48,5 +48,33 @@ if ($method === 'GET' && $action === 'by_skill') {
     sendResponse('success', 'Resources retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
+/* SEARCH resources by skill name */
+if ($method === 'GET' && $action === 'search') {
+    requireAuth();
+    $skillName = $_GET['skill_name'] ?? '';
+    
+    if (empty($skillName)) {
+        // If no search term, return all resources
+        $stmt = $conn->query("
+            SELECT r.res_id, r.name, r.url, r.type,
+                   s.name AS skill
+            FROM resources r
+            JOIN skills s ON r.skill_id = s.skill_id
+        ");
+        sendResponse('success', 'Resources retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+    
+    // Search resources where skill name contains the search term
+    $stmt = $conn->prepare("
+        SELECT r.res_id, r.name, r.url, r.type,
+               s.name AS skill
+        FROM resources r
+        JOIN skills s ON r.skill_id = s.skill_id
+        WHERE s.name LIKE ?
+    ");
+    $stmt->execute(['%' . $skillName . '%']);
+    sendResponse('success', 'Resources retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
 sendResponse('error', 'Invalid request');
 ?>

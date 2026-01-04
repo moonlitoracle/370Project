@@ -136,6 +136,52 @@
             padding: var(--space-3xl);
             color: var(--color-text-secondary);
         }
+
+        .level-progress {
+            margin: var(--space-md) 0;
+        }
+
+        .level-progress .current-level {
+            color: var(--color-success);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .test-question {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-md);
+        }
+
+        .test-question h4 {
+            margin-bottom: var(--space-md);
+            color: var(--color-text-primary);
+        }
+
+        .test-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .test-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .test-option:hover {
+            background: var(--glass-bg);
+        }
+
+        .test-option input[type="radio"] {
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -181,6 +227,28 @@
             <h2>Current Skills</h2>
             <div id="skillsList" class="skills-grid"></div>
         </section>
+
+        <!-- Proficiency Test Modal -->
+        <div id="testModal" class="modal" style="display: none;">
+            <div class="modal-backdrop" onclick="closeTestModal()"></div>
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h2 id="testTitle"></h2>
+                    <button class="modal-close" onclick="closeTestModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="testProgress"
+                        style="text-align: center; margin-bottom: var(--space-lg); color: var(--color-text-secondary);">
+                    </div>
+                    <div id="testQuestions"></div>
+                </div>
+                <div class="modal-footer" style="justify-content: space-between;">
+                    <button id="prevQuestionBtn" class="btn btn-secondary" onclick="prevQuestion()">← Previous</button>
+                    <button id="nextQuestionBtn" class="btn btn-primary" onclick="nextQuestion()">Next →</button>
+                    <button id="submitTestBtn" class="btn btn-primary" style="display: none;">Submit Test</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer>
@@ -238,14 +306,23 @@
             userSkills.forEach(skill => {
                 const skillCard = document.createElement('div');
                 skillCard.className = 'skill-card';
+
+                // Determine next level
+                const levels = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
+                const currentIndex = levels.indexOf(skill.proficiency);
+                const nextLevel = currentIndex < levels.length - 1 ? levels[currentIndex + 1] : null;
+
                 skillCard.innerHTML = `
                     <h3>${skill.name}</h3>
                     <p>${skill.description || 'No description available'}</p>
-                    <div class="skill-proficiency">
-                        <label>Proficiency:</label>
-                        <span class="proficiency-badge proficiency-${skill.proficiency}">${skill.proficiency}</span>
+                    <div class="level-progress">
+                        <div><strong>Current Level:</strong> <span class="current-level">${skill.proficiency}</span></div>
+                        ${nextLevel ? `<div><strong>Next Level:</strong> ${nextLevel}</div>` : '<div style="color: var(--color-success);">✓ Maximum level achieved!</div>'}
                     </div>
-                    <button class="btn btn-secondary" onclick="removeSkill(${skill.skill_id})">Remove Skill</button>
+                    <div style="display: flex; gap: var(--space-sm); margin-top: var(--space-md);">
+                        ${nextLevel ? `<button class="btn btn-primary" onclick="takeTest(${skill.skill_id}, '${skill.name}', '${nextLevel}')">📝 Take ${nextLevel} Test</button>` : ''}
+                        <button class="btn btn-secondary" onclick="removeSkill(${skill.skill_id})">Remove Skill</button>
+                    </div>
                 `;
                 skillsList.appendChild(skillCard);
             });
@@ -285,6 +362,107 @@
                 UI.showMessage(result.message, 'error');
             }
         };
+
+        // Test functions - One question at a time
+        let currentTest = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+
+        window.takeTest = async (skillId, skillName, level) => {
+            const result = await ProficiencyTests.getTest(skillId, level);
+            if (result.status !== 'success') { UI.showMessage(result.message, 'error'); return; }
+
+            currentTest = { skillId, skillName, level, questions: result.data.questions };
+            currentQuestionIndex = 0;
+            userAnswers = {};
+
+            document.getElementById('testTitle').textContent = result.data.test_title + ' - ' + skillName;
+            showQuestion(currentQuestionIndex);
+            document.getElementById('testModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+
+        function showQuestion(index) {
+            const q = currentTest.questions[index];
+            const total = currentTest.questions.length;
+
+            document.getElementById('testProgress').innerHTML = 'Question ' + (index + 1) + ' of ' + total;
+
+            const savedAnswer = userAnswers[q.question_id] || '';
+            document.getElementById('testQuestions').innerHTML =
+                '<div class="test-question">' +
+                '<h4>Question ' + (index + 1) + '</h4>' +
+                '<p style="font-size: 1.1rem; margin-bottom: var(--space-lg);">' + q.question_text + '</p>' +
+                '<div class="test-options">' +
+                '<label class="test-option"><input type="radio" name="currentQ" value="A" ' + (savedAnswer === 'A' ? 'checked' : '') + '><span>A) ' + q.option_a + '</span></label>' +
+                '<label class="test-option"><input type="radio" name="currentQ" value="B" ' + (savedAnswer === 'B' ? 'checked' : '') + '><span>B) ' + q.option_b + '</span></label>' +
+                '<label class="test-option"><input type="radio" name="currentQ" value="C" ' + (savedAnswer === 'C' ? 'checked' : '') + '><span>C) ' + q.option_c + '</span></label>' +
+                '<label class="test-option"><input type="radio" name="currentQ" value="D" ' + (savedAnswer === 'D' ? 'checked' : '') + '><span>D) ' + q.option_d + '</span></label>' +
+                '</div></div>';
+
+            // Show/hide nav buttons
+            document.getElementById('prevQuestionBtn').style.display = index === 0 ? 'none' : 'inline-block';
+            document.getElementById('nextQuestionBtn').style.display = index === total - 1 ? 'none' : 'inline-block';
+            document.getElementById('submitTestBtn').style.display = index === total - 1 ? 'inline-block' : 'none';
+        }
+
+        function saveCurrentAnswer() {
+            const selected = document.querySelector('input[name="currentQ"]:checked');
+            if (selected && currentTest) {
+                userAnswers[currentTest.questions[currentQuestionIndex].question_id] = selected.value;
+            }
+        }
+
+        window.nextQuestion = function () {
+            saveCurrentAnswer();
+            if (currentQuestionIndex < currentTest.questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion(currentQuestionIndex);
+            }
+        };
+
+        window.prevQuestion = function () {
+            saveCurrentAnswer();
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion(currentQuestionIndex);
+            }
+        };
+
+        window.closeTestModal = function () {
+            document.getElementById('testModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentTest = null;
+            currentQuestionIndex = 0;
+            userAnswers = {};
+        };
+
+        document.getElementById('submitTestBtn').addEventListener('click', async function () {
+            saveCurrentAnswer();
+            if (!currentTest) return;
+
+            // Check all answered
+            let allAnswered = true;
+            currentTest.questions.forEach(function (q) {
+                if (!userAnswers[q.question_id]) allAnswered = false;
+            });
+
+            if (!allAnswered) {
+                alert('Please answer all questions before submitting.');
+                return;
+            }
+
+            var result = await ProficiencyTests.submitTest(currentTest.skillId, currentTest.level, userAnswers);
+            if (result.status === 'success') {
+                closeTestModal();
+                alert(result.data.passed
+                    ? '🎉 Passed with ' + result.data.percentage + '%! Upgraded to ' + currentTest.level + '.'
+                    : '❌ Failed with ' + result.data.percentage + '% (need ' + result.data.passing_score + '%). Try again!');
+                await loadUserSkills();
+            } else {
+                UI.showMessage(result.message, 'error');
+            }
+        });
 
         // Logout handler
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {

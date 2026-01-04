@@ -202,6 +202,27 @@ const Skills = {
     }
 };
 
+// ========== Proficiency Tests API ========== //
+const ProficiencyTests = {
+    getTest: async (skillId, level) => {
+        return await apiCall(`/proficiency_tests.php?action=get_test&skill_id=${skillId}&level=${level}`, {
+            method: 'GET'
+        });
+    },
+    submitTest: async (skillId, level, answers) => {
+        return await apiCall('/proficiency_tests.php?action=submit_test', {
+            method: 'POST',
+            body: JSON.stringify({ skill_id: skillId, level, answers })
+        });
+    },
+    getAttempts: async (skillId) => {
+        return await apiCall(`/proficiency_tests.php?action=attempts&skill_id=${skillId}`, {
+            method: 'GET'
+        });
+    }
+};
+
+
 // ========== Learning Resources API ========== //
 const Resources = {
     // Get resources for a specific skill

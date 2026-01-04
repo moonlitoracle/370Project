@@ -23,7 +23,45 @@
 
     <main class="container">
         <h1>Learning Resources</h1>
+        <input type="text" id="resourceSearch" placeholder="Search resources..." class="search-input"
+            style="margin-bottom: var(--space-md); width: 100%; max-width: 400px; padding: var(--space-sm); border: 1px solid var(--glass-border); border-radius: var(--radius-md); background: var(--glass-bg); color: var(--color-text-primary);">
         <div id="resourceList"></div>
+        <script>
+            let allResources = [];
+            async function loadResources() {
+                const res = await Resources.list();
+                if (res.status === 'success') {
+                    allResources = res.data;
+                    renderResources();
+                }
+            }
+            function renderResources(filter = '') {
+                const box = document.getElementById('resourceList');
+                box.innerHTML = '';
+                const filtered = allResources.filter(r =>
+                    r.name.toLowerCase().includes(filter.toLowerCase()) ||
+                    r.skill.toLowerCase().includes(filter.toLowerCase()) ||
+                    r.type.toLowerCase().includes(filter.toLowerCase())
+                );
+                if (filtered.length === 0) {
+                    box.innerHTML = '<p style="color: var(--color-text-muted);">No resources match your search.</p>';
+                    return;
+                }
+                filtered.forEach(r => {
+                    box.innerHTML += `
+                <div class="card">
+                    <h3>${r.name}</h3>
+                    <p><strong>Skill:</strong> ${r.skill}</p>
+                    <p><strong>Type:</strong> ${r.type}</p>
+                    <a href="${r.url}" target="_blank" class="btn">Open Resource</a>
+                </div>
+            `;
+                });
+            }
+            document.getElementById('resourceSearch').addEventListener('input', e => {
+                renderResources(e.target.value);
+            });
+        </script>
     </main>
 
     <script src="js/app.js"></script>

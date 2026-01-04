@@ -63,7 +63,7 @@
                 <p><strong>Status:</strong> <span id="goalDetailsStatus"></span></p>
 
                 <h3 style="margin-top: var(--space-xl);">Milestones</h3>
-                <div id="milestonesList" style="margin-bottom: var(--space-xl);"></div>
+                <div id="milestonesList" class="milestones-list" style="margin-bottom: var(--space-xl);"></div>
 
                 <h3>Add Milestone</h3>
                 <form id="addMilestoneForm">
@@ -151,7 +151,7 @@
                         milestonesList.appendChild(milestoneItem);
                     });
                 } else {
-                    milestonesList.innerHTML = '<p>No milestones yet</p>';
+                    milestonesList.innerHTML = '<p class="milestones-empty">No milestones yet</p>';
                 }
 
                 document.getElementById('goalDetails').style.display = 'block';

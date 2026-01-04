@@ -206,3 +206,133 @@ INSERT INTO resources (skill_id, name, type, url) VALUES
 INSERT INTO resources (skill_id, name, type, url) VALUES
 (22, 'Coursera - Effective Communication', 'Course', 'https://www.coursera.org/learn/wharton-communication-skills'),
 (23, 'Google Project Management Certificate', 'Course', 'https://www.coursera.org/professional-certificates/google-project-management');
+
+
+-- ===================================================
+-- PROFICIENCY TESTING SYSTEM - FIXED SCHEMA & SEED DATA  
+-- ===================================================
+-- Run this AFTER importing your main seed_data.sql
+
+-- Drop existing tables if they exist (to reset)
+DROP TABLE IF EXISTS test_attempts;
+DROP TABLE IF EXISTS test_questions;
+DROP TABLE IF EXISTS proficiency_tests;
+
+-- Table: proficiency_tests
+CREATE TABLE proficiency_tests (
+    test_id INT PRIMARY KEY AUTO_INCREMENT,
+    skill_id INT NOT NULL,
+    required_level ENUM('Beginner', 'Intermediate', 'Advanced', 'Expert') NOT NULL,
+    test_title VARCHAR(255) NOT NULL,
+    passing_score INT DEFAULT 70,
+    time_limit_minutes INT DEFAULT 30,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (skill_id) REFERENCES skills(skill_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_skill_level (skill_id, required_level)
+);
+
+-- Table: test_questions
+CREATE TABLE test_questions (
+    question_id INT PRIMARY KEY AUTO_INCREMENT,
+    test_id INT NOT NULL,
+    question_text TEXT NOT NULL,
+    option_a VARCHAR(500) NOT NULL,
+    option_b VARCHAR(500) NOT NULL,
+    option_c VARCHAR(500) NOT NULL,
+    option_d VARCHAR(500) NOT NULL,
+    correct_answer ENUM('A', 'B', 'C', 'D') NOT NULL,
+    points INT DEFAULT 10,
+    FOREIGN KEY (test_id) REFERENCES proficiency_tests(test_id) ON DELETE CASCADE
+);
+
+-- Table: test_attempts
+CREATE TABLE test_attempts (
+    attempt_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    test_id INT NOT NULL,
+    score INT NOT NULL,
+    total_points INT NOT NULL,
+    passed BOOLEAN NOT NULL,
+    answers JSON,
+    attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (test_id) REFERENCES proficiency_tests(test_id) ON DELETE CASCADE
+);
+
+-- ===================================================
+-- INSERT TESTS FOR ALL SKILLS (using skill names to find IDs)
+-- ===================================================
+
+-- Get JavaScript skill_id and create tests
+INSERT INTO proficiency_tests (skill_id, required_level, test_title, passing_score)
+SELECT skill_id, 'Intermediate', 'JavaScript DOM & Events', 70
+FROM skills WHERE name = 'JavaScript';
+
+-- Create variables for the test we just inserted
+SET @js_intermediate_test = LAST_INSERT_ID();
+
+-- Insert questions for JavaScript Intermediate
+INSERT INTO test_questions (test_id, question_text, option_a, option_b, option_c, option_d, correct_answer) VALUES
+(@js_intermediate_test, 'What method is used to select an element by ID?', 'getElementById()', 'querySelector()', 'selectById()', 'getElement()', 'A'),
+(@js_intermediate_test, 'Which event occurs when a user clicks on an HTML element?', 'onclick', 'onmouseclick', 'onpress', 'onhit', 'A'),
+(@js_intermediate_test, 'What does addEventListener() do?', 'Attaches an event handler to an element', 'Adds a new element', 'Creates an event', 'Removes an element', 'A'),
+(@js_intermediate_test, 'What is the purpose of preventDefault()?', 'Stops the default action of an event', 'Prevents errors', 'Stops propagation', 'Validates data', 'A'),
+(@js_intermediate_test, 'How do you access the value of an input field?', 'element.value', 'element.text', 'element.content', 'element.data', 'A');
+
+-- Python tests
+INSERT INTO proficiency_tests (skill_id, required_level, test_title, passing_score)
+SELECT skill_id, 'Intermediate', 'Python OOP & Modules', 70
+FROM skills WHERE name = 'Python';
+
+SET @py_intermediate_test = LAST_INSERT_ID();
+
+INSERT INTO test_questions (test_id, question_text, option_a, option_b, option_c, option_d, correct_answer) VALUES
+(@py_intermediate_test, 'How do you define a class in Python?', 'class MyClass:', 'def MyClass:', 'new MyClass:', 'create MyClass:', 'A'),
+(@py_intermediate_test, 'What is __init__ used for?', 'Constructor method', 'Destructor', 'Static method', 'Class method', 'A'),
+(@py_intermediate_test, 'How do you import a module?', 'import module_name', 'include module_name', 'require module_name', 'load module_name', 'A'),
+(@py_intermediate_test, 'What does self refer to?', 'Current instance of the class', 'The class itself', 'Parent class', 'Global variable', 'A'),
+(@py_intermediate_test, 'How do you inherit from a parent class?', 'class Child(Parent):', 'class Child extends Parent:', 'class Child inherits Parent:', 'class Child : Parent:', 'A');
+
+-- SQL tests  
+INSERT INTO proficiency_tests (skill_id, required_level, test_title, passing_score)
+SELECT skill_id, 'Intermediate', 'SQL Joins & Subqueries', 70
+FROM skills WHERE name = 'SQL';
+
+SET @sql_intermediate_test = LAST_INSERT_ID();
+
+INSERT INTO test_questions (test_id, question_text, option_a, option_b, option_c, option_d, correct_answer) VALUES
+(@sql_intermediate_test, 'What type of JOIN returns all rows from both tables?', 'FULL OUTER JOIN', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'A'),
+(@sql_intermediate_test, 'What is a subquery?', 'Query nested inside another query', 'Query with multiple tables', 'Query with GROUP BY', 'Query with ORDER BY', 'A'),
+(@sql_intermediate_test, 'Which JOIN returns only matching rows?', 'INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'CROSS JOIN', 'A'),
+(@sql_intermediate_test, 'What does LEFT JOIN do?', 'Returns all rows from left table', 'Returns all rows from right table', 'Returns only matching rows', 'Returns random rows', 'A'),
+(@sql_intermediate_test, 'Where can a subquery be placed?', 'SELECT, FROM, or WHERE clause', 'Only in SELECT', 'Only in WHERE', 'Only in FROM', 'A');
+
+-- HTML/CSS tests
+INSERT INTO proficiency_tests (skill_id, required_level, test_title, passing_score)
+SELECT skill_id, 'Intermediate', 'HTML/CSS Layout & Styling', 70
+FROM skills WHERE name = 'HTML/CSS';
+
+SET @html_intermediate_test = LAST_INSERT_ID();
+
+INSERT INTO test_questions (test_id, question_text, option_a, option_b, option_c, option_d, correct_answer) VALUES
+(@html_intermediate_test, 'What CSS property creates flexbox layout?', 'display: flex', 'display: block', 'display: inline', 'display: grid', 'A'),
+(@html_intermediate_test, 'How do you center an element horizontally with margin?', 'margin: 0 auto', 'margin: auto 0', 'margin: center', 'margin: middle', 'A'),
+(@html_intermediate_test, 'What is the box model order from inside out?', 'Content, Padding, Border, Margin', 'Margin, Border, Padding, Content', 'Border, Padding, Content, Margin', 'Padding, Content, Border, Margin', 'A'),
+(@html_intermediate_test, 'Which position value removes element from document flow?', 'absolute', 'relative', 'static', 'sticky', 'A'),
+(@html_intermediate_test, 'What property controls stacking order?', 'z-index', 'stack-order', 'layer', 'depth', 'A');
+
+-- Cybersecurity tests
+INSERT INTO proficiency_tests (skill_id, required_level, test_title, passing_score)
+SELECT skill_id, 'Intermediate', 'Cybersecurity Fundamentals', 70
+FROM skills WHERE name = 'Cybersecurity';
+
+SET @cyber_intermediate_test = LAST_INSERT_ID();
+
+INSERT INTO test_questions (test_id, question_text, option_a, option_b, option_c, option_d, correct_answer) VALUES
+(@cyber_intermediate_test, 'What is SQL injection?', 'Inserting malicious SQL into queries', 'A database backup method', 'A type of encryption', 'A network protocol', 'A'),
+(@cyber_intermediate_test, 'What does HTTPS provide?', 'Encrypted communication', 'Faster loading', 'Better SEO', 'More storage', 'A'),
+(@cyber_intermediate_test, 'What is a firewall?', 'Network security system', 'Antivirus software', 'Password manager', 'Backup system', 'A'),
+(@cyber_intermediate_test, 'What is phishing?', 'Fraudulent attempt to obtain sensitive info', 'A type of malware', 'Network scanning', 'Data encryption', 'A'),
+(@cyber_intermediate_test, 'What does XSS stand for?', 'Cross-Site Scripting', 'Extra Secure System', 'External Security Service', 'Extended Session Storage', 'A');
+
+SELECT 'Proficiency tests schema and data imported successfully!' AS Status;

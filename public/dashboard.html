@@ -69,6 +69,20 @@
                 <a href="resources.html" class="btn btn-secondary">Browse Resources</a>
             </div>
         </section>
+
+        <section class="dashboard-section">
+            <h2>My Skills & Proficiency</h2>
+            <div id="dashboardSkills" class="skills-dashboard-grid">
+                <p style="color: var(--color-text-muted);">Loading skills...</p>
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>Recent Test History</h2>
+            <div id="testHistory" class="test-history-list">
+                <p style="color: var(--color-text-muted);">Loading test history...</p>
+            </div>
+        </section>
     </main>
 
     <footer>
@@ -110,10 +124,45 @@
             }
         });
 
+        // Load user skills for dashboard
+        async function loadDashboardSkills() {
+            const container = document.getElementById('dashboardSkills');
+            const result = await Skills.list();
+
+            if (result.status === 'success' && result.data.length > 0) {
+                container.innerHTML = '';
+                result.data.forEach(skill => {
+                    const levelColors = { 'Beginner': 'var(--color-info)', 'Intermediate': 'var(--color-warning)', 'Advanced': 'var(--color-primary)', 'Expert': 'var(--color-success)' };
+                    container.innerHTML += '<div style="background: var(--glass-bg); border: 1px solid var(--glass-border); padding: var(--space-md) var(--space-lg); border-radius: var(--radius-lg); display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600;">' + skill.name + '</span><span style="color: ' + (levelColors[skill.proficiency] || 'white') + '; font-size: 0.85rem; padding: 4px 12px; border-radius: 20px; background: rgba(255,255,255,0.1);">' + skill.proficiency + '</span></div>';
+                });
+            } else {
+                container.innerHTML = '<p style="color: var(--color-text-muted);">No skills added yet. <a href="skill-management.html" style="color: var(--color-primary);">Add your first skill</a></p>';
+            }
+        }
+
+        // Load test history
+        async function loadTestHistory() {
+            const container = document.getElementById('testHistory');
+            const result = await apiCall('/proficiency_tests.php?action=all_attempts', { method: 'GET' });
+
+            if (result.status === 'success' && result.data.length > 0) {
+                container.innerHTML = '';
+                result.data.forEach(attempt => {
+                    const date = new Date(attempt.attempted_at).toLocaleDateString();
+                    const percentage = Math.round((attempt.score / attempt.total_points) * 100);
+                    container.innerHTML += '<div style="background: var(--glass-bg); border: 1px solid var(--glass-border); padding: var(--space-md) var(--space-lg); border-radius: var(--radius-lg); margin-bottom: var(--space-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-sm);"><div><strong>' + attempt.skill_name + '</strong> - ' + attempt.test_title + '<div style="font-size: 0.85rem; color: var(--color-text-muted);">' + date + '</div></div><div style="text-align: right;"><span style="color: ' + (attempt.passed ? 'var(--color-success)' : 'var(--color-error)') + '; font-weight: 600;">' + (attempt.passed ? '✓ PASSED' : '✗ FAILED') + '</span><div style="font-size: 0.85rem; color: var(--color-text-muted);">' + percentage + '%</div></div></div>';
+                });
+            } else {
+                container.innerHTML = '<p style="color: var(--color-text-muted);">No tests taken yet. <a href="skill-management.html" style="color: var(--color-primary);">Take your first proficiency test</a></p>';
+            }
+        }
+
         // Initialize
         (async () => {
             if (await checkAuth()) {
                 await loadProfile();
+                await loadDashboardSkills();
+                await loadTestHistory();
             }
         })();
     </script>
