@@ -24,7 +24,7 @@ if ($method === 'GET') {
     requireAuth();
     $userId = $_SESSION['user_id'];
 
-    // Get all careers the user is interested in (from user_careers)
+    // Get user's careers
     $stmt = $conn->prepare("
         SELECT c.career_id, c.name
         FROM user_careers uc
@@ -36,7 +36,7 @@ if ($method === 'GET') {
 
     $gaps = [];
     foreach ($careers as $career) {
-        // Reuse logic similar to career_readiness.php for each career
+        // Check each career
         $stmt = $conn->prepare("
             SELECT s.name,
                    cs.level AS required_level,
@@ -88,7 +88,7 @@ if ($method === 'GET') {
         ];
     }
 
-    // Overall summary
+    // Average match
     $overallMatch = count($gaps) > 0 ? array_sum(array_column($gaps, 'match_percentage')) / count($gaps) : 0;
     $overallMatch = round($overallMatch, 2);
 

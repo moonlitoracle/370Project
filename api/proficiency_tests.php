@@ -21,7 +21,7 @@ function requireAuth() {
     }
 }
 
-// GET TEST - Retrieve test questions for a skill and level
+// Get test
 if ($method === 'GET' && $action === 'get_test') {
     requireAuth();
     
@@ -34,7 +34,7 @@ if ($method === 'GET' && $action === 'get_test') {
     
     $userId = $_SESSION['user_id'];
     
-    // Check if test exists for this skill/level
+    // Find test
     $stmt = $conn->prepare("
         SELECT test_id, test_title, passing_score, time_limit_minutes
         FROM proficiency_tests
@@ -47,7 +47,7 @@ if ($method === 'GET' && $action === 'get_test') {
         sendResponse('error', 'No test found for this skill and level');
     }
     
-    // Check user's current level for this skill
+    // Check current level
     $stmt = $conn->prepare("
         SELECT proficiency FROM user_skills
         WHERE user_id = ? AND skill_id = ?
@@ -55,7 +55,7 @@ if ($method === 'GET' && $action === 'get_test') {
     $stmt->execute([$userId, $skillId]);
     $userSkill = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Determine if user is eligible to take this test
+    // Check eligibility
     $levels = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
     $currentLevel = $userSkill ? $userSkill['proficiency'] : 'None';
     $currentLevelIndex = array_search($currentLevel, $levels);
@@ -65,7 +65,7 @@ if ($method === 'GET' && $action === 'get_test') {
         sendResponse('error', 'You already have this proficiency level or higher');
     }
     
-    // Get test questions (without correct answers)
+    // Get questions
     $stmt = $conn->prepare("
         SELECT question_id, question_text, option_a, option_b, option_c, option_d, points
         FROM test_questions
@@ -81,7 +81,7 @@ if ($method === 'GET' && $action === 'get_test') {
     sendResponse('success', 'Test retrieved', $test);
 }
 
-// SUBMIT TEST - Process test submission and calculate score
+// Submit test
 if ($method === 'POST' && $action === 'submit_test') {
     requireAuth();
     
@@ -96,7 +96,6 @@ if ($method === 'POST' && $action === 'submit_test') {
     
     $userId = $_SESSION['user_id'];
     
-    // Get test info
     $stmt = $conn->prepare("
         SELECT test_id, passing_score
         FROM proficiency_tests
@@ -109,7 +108,6 @@ if ($method === 'POST' && $action === 'submit_test') {
         sendResponse('error', 'Test not found');
     }
     
-    // Get correct answers
     $stmt = $conn->prepare("
         SELECT question_id, correct_answer, points
         FROM test_questions
@@ -118,7 +116,6 @@ if ($method === 'POST' && $action === 'submit_test') {
     $stmt->execute([$test['test_id']]);
     $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Calculate score
     $totalPoints = 0;
     $earnedPoints = 0;
     
@@ -135,7 +132,6 @@ if ($method === 'POST' && $action === 'submit_test') {
     $percentage = $totalPoints > 0 ? round(($earnedPoints / $totalPoints) * 100, 2) : 0;
     $passed = $percentage >= $test['passing_score'];
     
-    // Store attempt
     $stmt = $conn->prepare("
         INSERT INTO test_attempts (user_id, test_id, score, total_points, passed, answers)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -149,9 +145,8 @@ if ($method === 'POST' && $action === 'submit_test') {
         json_encode($answers)
     ]);
     
-    // If passed, update user skill proficiency
+    // Update skill on pass
     if ($passed) {
-        // Check if user already has this skill
         $stmt = $conn->prepare("
             SELECT skill_id FROM user_skills
             WHERE user_id = ? AND skill_id = ?
@@ -160,7 +155,6 @@ if ($method === 'POST' && $action === 'submit_test') {
         $existingSkill = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($existingSkill) {
-            // Update proficiency
             $stmt = $conn->prepare("
                 UPDATE user_skills
                 SET proficiency = ?
@@ -168,7 +162,6 @@ if ($method === 'POST' && $action === 'submit_test') {
             ");
             $stmt->execute([$level, $userId, $skillId]);
         } else {
-            // Add skill with new proficiency
             $stmt = $conn->prepare("
                 INSERT INTO user_skills (user_id, skill_id, proficiency)
                 VALUES (?, ?, ?)
@@ -176,7 +169,7 @@ if ($method === 'POST' && $action === 'submit_test') {
             $stmt->execute([$userId, $skillId, $level]);
         }
 
-        // TRIGGER LEVEL UPDATE
+        // Update user level
         require_once 'utils.php';
         updateUserLevel($userId, $conn);
     }
@@ -190,7 +183,7 @@ if ($method === 'POST' && $action === 'submit_test') {
     ]);
 }
 
-// GET ATTEMPT HISTORY - View past test attempts
+// Get attempt history
 if ($method === 'GET' && $action === 'attempts') {
     requireAuth();
     
@@ -216,7 +209,7 @@ if ($method === 'GET' && $action === 'attempts') {
     sendResponse('success', 'Attempt history retrieved', $attempts);
 }
 
-// GET ALL USER ATTEMPTS - For dashboard test history
+// Get all attempts
 if ($method === 'GET' && $action === 'all_attempts') {
     requireAuth();
     $userId = $_SESSION['user_id'];

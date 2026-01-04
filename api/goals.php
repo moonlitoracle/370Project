@@ -21,8 +21,8 @@ function requireAuth() {
     }
 }
 
-// ---------- Goals ---------- //
-// List all goals for current user
+// Goals
+// List goals
 if ($method === 'GET' && $action === 'list') {
     requireAuth();
     $userId = $_SESSION['user_id'];
@@ -32,7 +32,7 @@ if ($method === 'GET' && $action === 'list') {
     sendResponse('success', 'Goals retrieved', $goals);
 }
 
-// Get a single goal with its milestones
+// Get goal details
 if ($method === 'GET' && $action === 'detail') {
     requireAuth();
     $goalId = $_GET['id'] ?? null;
@@ -42,7 +42,6 @@ if ($method === 'GET' && $action === 'detail') {
     $stmt->execute([$goalId, $userId]);
     $goal = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$goal) { sendResponse('error', 'Goal not found'); }
-    // Milestones
     $stmt = $conn->prepare("SELECT milestone_id, title, status FROM milestones WHERE goal_id = ?");
     $stmt->execute([$goalId]);
     $milestones = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -50,7 +49,7 @@ if ($method === 'GET' && $action === 'detail') {
     sendResponse('success', 'Goal details retrieved', $goal);
 }
 
-// Create a new goal
+// Create goal
 if ($method === 'POST' && $action === 'create') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
@@ -71,7 +70,7 @@ if ($method === 'POST' && $action === 'create') {
     }
 }
 
-// Update an existing goal (PUT or POST with action=update)
+// Update goal
 if (($method === 'PUT' || $method === 'POST') && $action === 'update') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
@@ -90,7 +89,7 @@ if (($method === 'PUT' || $method === 'POST') && $action === 'update') {
     try {
         $stmt->execute($params);
         
-        // TRIGGER LEVEL UPDATE IF COMPLETED
+        // Update level on completion
         if (isset($input['status']) && $input['status'] === 'completed') {
             require_once 'utils.php';
             updateUserLevel($_SESSION['user_id'], $conn);
@@ -102,7 +101,7 @@ if (($method === 'PUT' || $method === 'POST') && $action === 'update') {
     }
 }
 
-// Delete a goal (cascades milestones via foreign key ON DELETE CASCADE)
+// Delete goal (cascades)
 if ($method === 'DELETE' && $action === 'delete') {
     requireAuth();
     $goalId = $_GET['id'] ?? null;
@@ -116,8 +115,8 @@ if ($method === 'DELETE' && $action === 'delete') {
     }
 }
 
-// ---------- Milestones ---------- //
-// Add a milestone to a goal
+// Milestones
+// Add milestone
 if ($method === 'POST' && $action === 'add_milestone') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
@@ -125,7 +124,7 @@ if ($method === 'POST' && $action === 'add_milestone') {
     $title = trim($input['title'] ?? '');
     $status = $input['status'] ?? 'pending';
     if (!$goalId || empty($title)) { sendResponse('error', 'goal_id and title required'); }
-    // Verify goal belongs to user
+    // Check ownership
     $stmt = $conn->prepare("SELECT goal_id FROM goals WHERE goal_id = ? AND user_id = ?");
     $stmt->execute([$goalId, $_SESSION['user_id']]);
     if (!$stmt->fetch()) { sendResponse('error', 'Goal not found or unauthorized'); }
@@ -139,7 +138,7 @@ if ($method === 'POST' && $action === 'add_milestone') {
     }
 }
 
-// Update a milestone
+// Update milestone
 if (($method === 'PUT' || $method === 'POST') && $action === 'update_milestone') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
@@ -150,7 +149,7 @@ if (($method === 'PUT' || $method === 'POST') && $action === 'update_milestone')
     if (isset($input['title'])) { $fields[] = 'title = ?'; $params[] = $input['title']; }
     if (isset($input['status'])) { $fields[] = 'status = ?'; $params[] = $input['status']; }
     if (empty($fields)) { sendResponse('error', 'No fields to update'); }
-    // Ensure milestone belongs to user's goal
+    // Check ownership
     $stmt = $conn->prepare("SELECT m.milestone_id FROM milestones m JOIN goals g ON m.goal_id = g.goal_id WHERE m.milestone_id = ? AND g.user_id = ?");
     $stmt->execute([$milestoneId, $_SESSION['user_id']]);
     if (!$stmt->fetch()) { sendResponse('error', 'Milestone not found or unauthorized'); }
@@ -165,12 +164,12 @@ if (($method === 'PUT' || $method === 'POST') && $action === 'update_milestone')
     }
 }
 
-// Delete a milestone
+// Delete milestone
 if ($method === 'DELETE' && $action === 'delete_milestone') {
     requireAuth();
     $mid = $_GET['id'] ?? null;
     if (!$mid) { sendResponse('error', 'Milestone ID required'); }
-    // Verify ownership
+    // Check ownership
     $stmt = $conn->prepare("SELECT m.milestone_id FROM milestones m JOIN goals g ON m.goal_id = g.goal_id WHERE m.milestone_id = ? AND g.user_id = ?");
     $stmt->execute([$mid, $_SESSION['user_id']]);
     if (!$stmt->fetch()) { sendResponse('error', 'Milestone not found or unauthorized'); }

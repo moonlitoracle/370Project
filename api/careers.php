@@ -21,7 +21,7 @@ function requireAuth() {
     }
 }
 
-// LIST all careers
+// List careers
 if ($method === 'GET' && $action === 'list') {
     requireAuth();
     $userId = $_SESSION['user_id'];
@@ -37,26 +37,24 @@ if ($method === 'GET' && $action === 'list') {
     sendResponse('success', 'Careers retrieved', $careers);
 }
 
-// GET career details including required skills
+// Get career details
 if ($method === 'GET' && $action === 'details') {
     $careerId = $_GET['id'] ?? null;
     if (!$careerId) {
         sendResponse('error', 'Career ID required');
     }
-    // Career info
     $stmt = $conn->prepare("SELECT career_id, name, overview FROM careers WHERE career_id = ?");
     $stmt->execute([$careerId]);
     $career = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$career) {
         sendResponse('error', 'Career not found');
     }
-    // Check if selected
     $userId = $_SESSION['user_id'];
     $check = $conn->prepare("SELECT * FROM user_careers WHERE user_id = ? AND career_id = ?");
     $check->execute([$userId, $careerId]);
     $career['is_selected'] = $check->fetch() ? true : false;
 
-    // Required skills for this career
+    // Get required skills
     $stmt = $conn->prepare("SELECT s.skill_id, s.name, s.description, cs.level FROM career_skills cs JOIN skills s ON cs.skill_id = s.skill_id WHERE cs.career_id = ?");
     $stmt->execute([$careerId]);
     $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -64,7 +62,7 @@ if ($method === 'GET' && $action === 'details') {
     sendResponse('success', 'Career details retrieved', $career);
 }
 
-// USER selects a career (adds to user_careers)
+// Select career
 if ($method === 'POST' && $action === 'select') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
@@ -73,13 +71,11 @@ if ($method === 'POST' && $action === 'select') {
         sendResponse('error', 'career_id is required');
     }
     $userId = $_SESSION['user_id'];
-    // Check if already selected
     $stmt = $conn->prepare("SELECT * FROM user_careers WHERE user_id = ? AND career_id = ?");
     $stmt->execute([$userId, $careerId]);
     if ($stmt->fetch()) {
         sendResponse('error', 'Career already selected');
     }
-    // Insert selection
     $stmt = $conn->prepare("INSERT INTO user_careers (user_id, career_id) VALUES (?, ?)");
     try {
         $stmt->execute([$userId, $careerId]);
@@ -89,7 +85,7 @@ if ($method === 'POST' && $action === 'select') {
     }
 }
 
-// USER removes a selected career
+// Remove career
 if ($method === 'POST' && $action === 'remove') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);

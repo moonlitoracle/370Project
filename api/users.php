@@ -5,7 +5,7 @@ require_once '../config/db.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Helper function to send JSON response
+// Send JSON response
 function sendResponse($status, $message, $data = null) {
     echo json_encode([
         'status' => $status,
@@ -15,14 +15,14 @@ function sendResponse($status, $message, $data = null) {
     exit;
 }
 
-// Check if user is logged in
+// Check auth
 function requireAuth() {
     if (!isset($_SESSION['user_id'])) {
         sendResponse('error', 'Unauthorized. Please log in.');
     }
 }
 
-// GET user profile
+// Get profile
 if ($method === 'GET') {
     requireAuth();
     
@@ -49,7 +49,7 @@ if ($method === 'GET') {
     }
 }
 
-// PUT/POST - Update user profile
+// Update profile
 if ($method === 'PUT' || $method === 'POST') {
     requireAuth();
     
@@ -59,7 +59,7 @@ if ($method === 'PUT' || $method === 'POST') {
     $name = trim($input['name'] ?? '');
     $email = trim($input['email'] ?? '');
     
-    // Validation
+
     if (empty($name)) {
         sendResponse('error', 'Name is required');
     }
@@ -68,14 +68,13 @@ if ($method === 'PUT' || $method === 'POST') {
         sendResponse('error', 'Valid email is required');
     }
     
-    // Check if email is already taken by another user
+    // Check email availability
     $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ? AND user_id != ?");
     $stmt->execute([$email, $userId]);
     if ($stmt->fetch()) {
         sendResponse('error', 'Email already in use by another account');
     }
     
-    // Update user
     $stmt = $conn->prepare("UPDATE users SET name = ?, email = ? WHERE user_id = ?");
     
     try {

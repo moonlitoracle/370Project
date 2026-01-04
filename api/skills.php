@@ -21,13 +21,13 @@ function requireAuth() {
     }
 }
 
-// LIST all available skills (for dropdown)
+// List all skills
 if ($method === 'GET' && $action === 'all') {
     $stmt = $conn->query("SELECT skill_id, name, description FROM skills ORDER BY name");
     sendResponse('success', 'All skills retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
-// LIST user's skills
+// List user skills
 if ($method === 'GET' && $action === 'list') {
     requireAuth();
     $userId = $_SESSION['user_id'];
@@ -41,12 +41,12 @@ if ($method === 'GET' && $action === 'list') {
     sendResponse('success', 'User skills retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
-// ADD a skill to user
+// Add skill
 if ($method === 'POST' && $action === 'add') {
     requireAuth();
     $input = json_decode(file_get_contents('php://input'), true);
     $skillId = $input['skill_id'] ?? null;
-    $proficiency = 'Beginner'; // ALWAYS start at Beginner - upgrades require passing tests
+    $proficiency = 'Beginner'; // Always start at Beginner
 
     if (!$skillId) {
         sendResponse('error', 'skill_id required');
@@ -54,14 +54,12 @@ if ($method === 'POST' && $action === 'add') {
 
     $userId = $_SESSION['user_id'];
 
-    // Check if skill exists
     $stmt = $conn->prepare("SELECT skill_id FROM skills WHERE skill_id = ?");
     $stmt->execute([$skillId]);
     if (!$stmt->fetch()) {
         sendResponse('error', 'Skill not found');
     }
 
-    // Check if already added
     $stmt = $conn->prepare("SELECT * FROM user_skills WHERE user_id = ? AND skill_id = ?");
     $stmt->execute([$userId, $skillId]);
     if ($stmt->fetch()) {
@@ -77,10 +75,9 @@ if ($method === 'POST' && $action === 'add') {
     }
 }
 
-// UPDATE endpoint REMOVED - Proficiency levels can only be changed by passing proficiency tests
-// Use /proficiency_tests.php to upgrade skill levels
+// Proficiency updates via tests only
 
-// DELETE a user skill
+// Delete skill
 if ($method === 'DELETE' && $action === 'delete') {
     requireAuth();
     $skillId = $_GET['skill_id'] ?? null;

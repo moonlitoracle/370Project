@@ -64,7 +64,7 @@ if ($method === 'GET' && $action === 'evaluate') {
         if ($s['user_val'] >= $s['req_val']) {
             $matched++;
         } else {
-            // Remove internal validation values before sending to frontend
+            // Clean up response
             unset($s['req_val']);
             unset($s['user_val']);
             $gaps[] = $s;

@@ -21,7 +21,7 @@ function requireAuth() {
     }
 }
 
-/* LIST all resources */
+// List all resources
 if ($method === 'GET' && $action === 'list') {
     requireAuth();
     $stmt = $conn->query("
@@ -33,7 +33,7 @@ if ($method === 'GET' && $action === 'list') {
     sendResponse('success', 'Resources retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
-/* GET resources for a specific skill */
+// Get resources by skill
 if ($method === 'GET' && $action === 'by_skill') {
     requireAuth();
     $skillId = $_GET['skill_id'] ?? null;
@@ -48,13 +48,13 @@ if ($method === 'GET' && $action === 'by_skill') {
     sendResponse('success', 'Resources retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
-/* SEARCH resources by skill name */
+// Search resources by skill name
 if ($method === 'GET' && $action === 'search') {
     requireAuth();
     $skillName = $_GET['skill_name'] ?? '';
     
     if (empty($skillName)) {
-        // If no search term, return all resources
+        // Return all if no search term
         $stmt = $conn->query("
             SELECT r.res_id, r.name, r.url, r.type,
                    s.name AS skill
@@ -64,7 +64,7 @@ if ($method === 'GET' && $action === 'search') {
         sendResponse('success', 'Resources retrieved', $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
     
-    // Search resources where skill name contains the search term
+    // Search by skill name
     $stmt = $conn->prepare("
         SELECT r.res_id, r.name, r.url, r.type,
                s.name AS skill

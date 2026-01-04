@@ -26,12 +26,12 @@ if ($method === 'GET') {
     requireAuth();
     $userId = $_SESSION['user_id'];
 
-    // Skills tracked (from insights)
+    // Skills count
     $skills = $conn->prepare("SELECT COUNT(*) FROM user_skills WHERE user_id = ?");
     $skills->execute([$userId]);
     $skillsCount = $skills->fetchColumn();
 
-    // Skill proficiency breakdown
+    // Proficiency breakdown
     $profStmt = $conn->prepare("
         SELECT proficiency, COUNT(*) as count
         FROM user_skills
@@ -41,7 +41,7 @@ if ($method === 'GET') {
     $profStmt->execute([$userId]);
     $proficiencies = $profStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Goals (from insights)
+    // Goals count
     $goals = $conn->prepare("SELECT COUNT(*) FROM goals WHERE user_id = ?");
     $goals->execute([$userId]);
     $goalsTotal = $goals->fetchColumn();
@@ -50,7 +50,7 @@ if ($method === 'GET') {
     $completed->execute([$userId]);
     $goalsCompleted = $completed->fetchColumn();
 
-    // Milestone completion rate
+    // Milestone completion
     $milestonesTotal = $conn->prepare("
         SELECT COUNT(*) FROM milestones m
         JOIN goals g ON m.goal_id = g.goal_id
@@ -69,13 +69,11 @@ if ($method === 'GET') {
 
     $milestoneCompletionRate = $milestonesTotalCount > 0 ? round(($milestonesCompletedCount / $milestonesTotalCount) * 100, 2) : 0;
 
-    // User level (assuming level in users table indicates growth)
+    // User level
     $levelStmt = $conn->prepare("SELECT level FROM users WHERE user_id = ?");
     $levelStmt->execute([$userId]);
     $userLevel = $levelStmt->fetchColumn();
 
-    // Note: For true "growth" tracking, we'd need timestamps on proficiency changes or logs, but schema doesn't have it.
-    // Assuming current state as proxy for growth.
 
     sendResponse('success', 'Progress and growth tracked', [
         'skills_tracked' => $skillsCount,
