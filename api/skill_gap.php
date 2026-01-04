@@ -41,7 +41,7 @@ if ($method === 'GET') {
             SELECT s.name,
                    cs.level AS required_level,
                    IFNULL(us.proficiency, 'None') AS user_level,
-                   CASE cs.level
+                   CASE TRIM(cs.level)
                        WHEN 'Beginner' THEN 1
                        WHEN 'Intermediate' THEN 2
                        WHEN 'Advanced' THEN 3

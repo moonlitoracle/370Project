@@ -450,16 +450,17 @@
             });
 
             if (!allAnswered) {
-                alert('Please answer all questions before submitting.');
+                UI.showMessage('Please answer all questions before submitting.', 'warning');
                 return;
             }
 
             var result = await ProficiencyTests.submitTest(currentTest.skillId, currentTest.level, userAnswers);
             if (result.status === 'success') {
                 closeTestModal();
-                alert(result.data.passed
+                const msg = result.data.passed
                     ? '🎉 Passed with ' + result.data.percentage + '%! Upgraded to ' + currentTest.level + '.'
-                    : '❌ Failed with ' + result.data.percentage + '% (need ' + result.data.passing_score + '%). Try again!');
+                    : '❌ Failed with ' + result.data.percentage + '% (need ' + result.data.passing_score + '%). Try again!';
+                UI.showMessage(msg, result.data.passed ? 'success' : 'warning');
                 await loadUserSkills();
             } else {
                 UI.showMessage(result.message, 'error');

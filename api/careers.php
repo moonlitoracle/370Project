@@ -89,5 +89,28 @@ if ($method === 'POST' && $action === 'select') {
     }
 }
 
+// USER removes a selected career
+if ($method === 'POST' && $action === 'remove') {
+    requireAuth();
+    $input = json_decode(file_get_contents('php://input'), true);
+    $careerId = $input['career_id'] ?? null;
+    if (!$careerId) {
+        sendResponse('error', 'career_id is required');
+    }
+    $userId = $_SESSION['user_id'];
+    
+    $stmt = $conn->prepare("DELETE FROM user_careers WHERE user_id = ? AND career_id = ?");
+    try {
+        $stmt->execute([$userId, $careerId]);
+        if ($stmt->rowCount() > 0) {
+            sendResponse('success', 'Career removed');
+        } else {
+            sendResponse('error', 'Career not found or not selected');
+        }
+    } catch (PDOException $e) {
+        sendResponse('error', 'Failed to remove career');
+    }
+}
+
 sendResponse('error', 'Invalid request');
 ?>

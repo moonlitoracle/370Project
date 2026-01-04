@@ -85,9 +85,18 @@
                     careerCard.className = 'career-card';
                     const isSelected = career.is_selected == 1;
                     const badgeHtml = isSelected ? '<span class="badge-selected">Selected</span>' : '';
-                    const btnHtml = isSelected
-                        ? `<button class="btn btn-outline" onclick="viewCareerDetails(${career.career_id})">View Details</button>`
-                        : `<button class="btn btn-primary" onclick="viewCareerDetails(${career.career_id})">View Details</button>`;
+
+                    let btnHtml = '';
+                    if (isSelected) {
+                        btnHtml = `
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-outline" onclick="viewCareerDetails(${career.career_id})">Details</button>
+                                <button class="btn btn-primary" style="background: var(--color-error); border-color: var(--color-error);" onclick="removeCareer(${career.career_id}, '${career.name}')">Remove</button>
+                            </div>
+                        `;
+                    } else {
+                        btnHtml = `<button class="btn btn-primary" onclick="viewCareerDetails(${career.career_id})">View Details</button>`;
+                    }
 
                     careerCard.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:start;">
@@ -132,16 +141,25 @@
                     }
 
                     const selectBtn = document.getElementById('selectCareerBtn');
+                    // Clone button to remove old event listeners
+                    const newBtn = selectBtn.cloneNode(true);
+                    selectBtn.parentNode.replaceChild(newBtn, selectBtn);
+
                     if (career.is_selected) {
-                        selectBtn.textContent = 'Already Selected';
-                        selectBtn.disabled = true;
-                        selectBtn.classList.add('btn-secondary');
-                        selectBtn.classList.remove('btn-primary');
+                        newBtn.textContent = 'Remove Career';
+                        newBtn.disabled = false;
+                        newBtn.classList.remove('btn-primary', 'btn-secondary');
+                        newBtn.style.background = 'var(--color-error)';
+                        newBtn.style.borderColor = 'var(--color-error)';
+                        newBtn.onclick = () => removeCareer(careerId, career.name);
                     } else {
-                        selectBtn.textContent = 'Select This Career';
-                        selectBtn.disabled = false;
-                        selectBtn.classList.add('btn-primary');
-                        selectBtn.classList.remove('btn-secondary');
+                        newBtn.textContent = 'Select This Career';
+                        newBtn.disabled = false;
+                        newBtn.classList.add('btn-primary');
+                        newBtn.classList.remove('btn-secondary');
+                        newBtn.style.background = ''; // Reset inline style
+                        newBtn.style.borderColor = '';
+                        newBtn.onclick = () => selectCareer(careerId);
                     }
 
                     document.getElementById('careerModal').style.display = 'flex';
@@ -149,11 +167,11 @@
                     document.body.style.overflow = 'hidden';
                 } else {
                     console.error('API Error:', result.message);
-                    alert('Error: ' + result.message);
+                    UI.showMessage('Error: ' + result.message, 'error');
                 }
             } catch (error) {
                 console.error('Failed to load career details:', error);
-                alert('Failed to load career details. Check console for details.');
+                UI.showMessage('Failed to load career details.', 'error');
             }
         };
 
@@ -164,17 +182,31 @@
         };
 
         // Select career
-        document.getElementById('selectCareerBtn').addEventListener('click', async () => {
-            if (!selectedCareerId) return;
-
-            const result = await Career.select(selectedCareerId);
+        async function selectCareer(careerId) {
+            const result = await Career.select(careerId);
             if (result.status === 'success') {
                 UI.showMessage('Career selected successfully! Refreshing...', 'success');
                 setTimeout(() => window.location.reload(), 1500);
             } else {
                 UI.showMessage(result.message, 'error');
             }
-        });
+        }
+
+        // Remove career
+        window.removeCareer = async (careerId, careerName) => {
+            if (!confirm(`Are you sure you want to remove "${careerName}" from your selected careers?`)) return;
+
+            const result = await Career.remove(careerId);
+            if (result.status === 'success') {
+                UI.showMessage('Career removed successfully.', 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                UI.showMessage(result.message, 'error');
+            }
+        };
+
+        // Old event listener removal (since we handle it dynamically now)
+        // document.getElementById('selectCareerBtn').addEventListener... -> Removed
 
         // Logout handler
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {

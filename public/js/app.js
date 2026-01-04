@@ -93,6 +93,14 @@ const Career = {
             method: 'POST',
             body: JSON.stringify({ career_id: careerId })
         });
+    },
+
+    // Remove a selected career
+    remove: async (careerId) => {
+        return await apiCall('/careers.php?action=remove', {
+            method: 'POST',
+            body: JSON.stringify({ career_id: careerId })
+        });
     }
 };
 
@@ -282,11 +290,29 @@ const SkillGap = {
 
 // ========== UI Helper Functions ========== //
 const UI = {
-    // Show message to user
+    // Show message to user (Toast Notification)
     showMessage: (message, type = 'info') => {
-        // Simple alert for now, can be enhanced with custom UI
-        console.log(`[${type.toUpperCase()}] ${message}`);
-        alert(message);
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:white;cursor:pointer;font-size:1.2em;">&times;</button>
+        `;
+
+        container.appendChild(toast);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.add('hide');
+            toast.addEventListener('transitionend', () => toast.remove());
+        }, 3000);
     },
 
     // Redirect to page
