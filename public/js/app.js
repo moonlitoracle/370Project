@@ -264,7 +264,7 @@ const Insights = {
 const Progress = {
     // Get user's overall progress
     get: async () => {
-        return await apiCall('/users.php', {
+        return await apiCall('/progress.php', {
             method: 'GET'
         });
     }

@@ -23,7 +23,16 @@ function requireAuth() {
 
 // LIST all careers
 if ($method === 'GET' && $action === 'list') {
-    $stmt = $conn->query("SELECT career_id, name, overview FROM careers");
+    requireAuth();
+    $userId = $_SESSION['user_id'];
+    $stmt = $conn->prepare("
+        SELECT 
+            c.career_id, c.name, c.overview,
+            CASE WHEN uc.user_id IS NOT NULL THEN 1 ELSE 0 END as is_selected
+        FROM careers c
+        LEFT JOIN user_careers uc ON c.career_id = uc.career_id AND uc.user_id = ?
+    ");
+    $stmt->execute([$userId]);
     $careers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     sendResponse('success', 'Careers retrieved', $careers);
 }
@@ -41,6 +50,12 @@ if ($method === 'GET' && $action === 'details') {
     if (!$career) {
         sendResponse('error', 'Career not found');
     }
+    // Check if selected
+    $userId = $_SESSION['user_id'];
+    $check = $conn->prepare("SELECT * FROM user_careers WHERE user_id = ? AND career_id = ?");
+    $check->execute([$userId, $careerId]);
+    $career['is_selected'] = $check->fetch() ? true : false;
+
     // Required skills for this career
     $stmt = $conn->prepare("SELECT s.skill_id, s.name, s.description, cs.level FROM career_skills cs JOIN skills s ON cs.skill_id = s.skill_id WHERE cs.career_id = ?");
     $stmt->execute([$careerId]);
