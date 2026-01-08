@@ -1,7 +1,6 @@
 vendor/
 node_modules/
 .env
-config/db.php
 *.log
 .DS_Store
 verification_report.md
